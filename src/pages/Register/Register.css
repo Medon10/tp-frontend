@@ -1,0 +1,201 @@
+/* Importar estilos base de Login.css */
+@import '../Login/Login.css';
+
+/* Estilos específicos para Register */
+
+/* Form row para campos lado a lado */
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* Field errors */
+.field-error {
+  color: #ff4444;
+  font-size: 0.8rem;
+  margin-top: 0.3rem;
+  display: block;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.form-group input.error {
+  border-color: #ff4444;
+  box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.1);
+}
+
+.form-group input.error:focus {
+  border-color: #ff4444;
+  box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.2);
+}
+
+/* Terms section */
+.form-terms {
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e5e5;
+}
+
+.form-terms p {
+  font-size: 0.85rem;
+  color: #666;
+  line-height: 1.4;
+}
+
+.form-terms .link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.form-terms .link:hover {
+  color: var(--secondary);
+  text-decoration: underline;
+}
+
+/* Password strength indicator (opcional) */
+.password-strength {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.strength-bar {
+  height: 4px;
+  flex: 1;
+  background: #e5e5e5;
+  border-radius: 2px;
+  transition: background-color 0.3s;
+}
+
+.strength-bar.weak {
+  background: #ff4444;
+}
+
+.strength-bar.medium {
+  background: #ffaa00;
+}
+
+.strength-bar.strong {
+  background: #44aa44;
+}
+
+.strength-text {
+  font-size: 0.75rem;
+  color: #666;
+  margin-left: 0.5rem;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { 
+    opacity: 0; 
+    transform: translateY(-5px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+/* Success message para registro exitoso */
+.success-message {
+  background: #e8f5e8;
+  border: 1px solid #44aa44;
+  color: #2d5016;
+  padding: 0.8rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  animation: fadeIn 0.3s ease-in;
+}
+
+.success-message i {
+  margin-right: 0.5rem;
+  color: #44aa44;
+}
+
+/* Modificaciones específicas para register */
+.auth-redirect p {
+  font-size: 0.95rem;
+}
+
+/* Features con iconos diferentes */
+.features .feature i {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--primary);
+}
+
+/* Demo banner para register */
+.demo-credentials {
+  background: linear-gradient(135deg, #e8f4fd, #b8e6ff);
+  color: #1565c0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+  
+  .form-terms p {
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .social-login {
+    gap: 0.6rem;
+  }
+  
+  .btn-google,
+  .btn-facebook {
+    font-size: 0.9rem;
+    padding: 0.7rem 1rem;
+  }
+  
+  .form-terms {
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+  }
+}
+
+/* Estados de hover mejorados para register */
+.btn-full:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(58, 134, 255, 0.3);
+}
+
+.btn-outline:hover {
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Focus states mejorados */
+.form-group input:focus {
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+/* Loading state refinements */
+.btn-loading {
+  position: relative;
+}
+
+.btn-loading::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: inherit;
+}

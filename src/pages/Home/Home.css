@@ -21,53 +21,14 @@ body {
   min-height: 100vh;
 }
 
-header {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
-  color: white;
-  padding: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
+/* Container global para todas las páginas */
 .container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 2rem;
 }
 
-nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.logo {
-  font-size: 1.8rem;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-}
-
-.logo i {
-  margin-right: 0.5rem;
-  font-size: 1.5rem;
-}
-
-.nav-links {
-  display: flex;
-  gap: 2rem;
-}
-
-.nav-links a {
-  color: white;
-  text-decoration: none;
-  font-weight: 500;
-  transition: opacity 0.3s;
-}
-
-.nav-links a:hover {
-  opacity: 0.8;
-}
-
+/* Hero section específica del home */
 .hero {
   text-align: center;
   padding: 3rem 1rem;
@@ -90,6 +51,7 @@ nav {
   margin-bottom: 2rem;
 }
 
+/* Budget form */
 .budget-form {
   background: white;
   border-radius: 12px;
@@ -126,6 +88,7 @@ nav {
   border-color: var(--primary);
 }
 
+/* Botones globales */
 .btn {
   display: inline-block;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
@@ -137,6 +100,7 @@ nav {
   border-radius: 6px;
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
+  text-decoration: none;
 }
 
 .btn:hover {
@@ -148,6 +112,17 @@ nav {
   width: 100%;
 }
 
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline:hover {
+  background: rgba(58, 134, 255, 0.1);
+}
+
+/* Results section */
 .results {
   display: none;
   margin-top: 3rem;
@@ -160,6 +135,7 @@ nav {
   color: var(--dark);
 }
 
+/* Package cards */
 .packages {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -224,16 +200,7 @@ nav {
   gap: 1rem;
 }
 
-.btn-outline {
-  background: transparent;
-  border: 1px solid var(--primary);
-  color: var(--primary);
-}
-
-.btn-outline:hover {
-  background: rgba(58, 134, 255, 0.1);
-}
-
+/* Loading */
 .loading {
   display: none;
   text-align: center;
@@ -254,6 +221,7 @@ nav {
   to { transform: rotate(360deg); }
 }
 
+/* Features section */
 .features {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -284,6 +252,7 @@ nav {
   color: #666;
 }
 
+/* Footer */
 footer {
   background: var(--dark);
   color: white;
@@ -329,6 +298,7 @@ footer {
   font-size: 0.9rem;
 }
 
+/* Banner */
 .banner {
   display: none;
   position: fixed;
@@ -348,9 +318,10 @@ footer {
   to { transform: translateY(0); opacity: 1; }
 }
 
+/* Responsive */
 @media (max-width: 768px) {
-  .nav-links {
-    display: none;
+  .container {
+    padding: 0 1rem;
   }
   
   .hero h1 {
@@ -359,6 +330,10 @@ footer {
   
   .hero p {
     font-size: 1rem;
+  }
+  
+  .budget-form {
+    padding: 1.5rem;
   }
   
   .footer-content {

@@ -128,7 +128,7 @@
 /* Demo credentials banner */
 .demo-credentials {
   position: fixed;
-  top: 20px;
+  bottom: 20px;
   right: 20px;
   background: linear-gradient(135deg, #ffd700, #ffb347);
   color: #8b4513;

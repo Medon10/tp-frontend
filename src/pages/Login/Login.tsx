@@ -1,62 +1,129 @@
 import './Login.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 export const Login: React.FC = () => {
-    const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState({
     email: '',
     password: ''
-});
+  });
 
-const [isLoading, setIsLoading] = useState(false);
-const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
-const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const { login, isAuthenticated, loading } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // Obtener la ruta de donde venía el usuario
+  const from = location.state?.from?.pathname || '/perfil';
+
+  // Si ya está autenticado, redirigir
+  useEffect(() => {
+    if (isAuthenticated && !loading) {
+      navigate(from, { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate, from]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData(prev => ({
-    ...prev,
-    [id]: value
+      ...prev,
+      [id]: value
     }));
     // Limpiar error cuando el usuario empiece a escribir
     if (error) setError('');
-};
+  };
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.email || !formData.password) {
-    setError('Por favor completa todos los campos');
-    return;
+      setError('Por favor completa todos los campos');
+      return;
     }
 
     setIsLoading(true);
     setError('');
 
     try {
-      // Aquí harías la llamada a tu API del backend
-      // const response = await authService.login(formData);
-    
-      // Simulación temporal
-    console.log('Intentando login con:', formData);
-    
-      // Simular delay de API
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-      // Simular éxito o error
-    if (formData.email === 'admin@test.com' && formData.password === '123456') {
-        // Login exitoso - aquí redirigirías al dashboard
-        alert('Login exitoso! Redirigiendo...');
-        // window.location.href = '/dashboard';
-      } else {
-        setError('Credenciales incorrectas. Intenta con admin@test.com / 123456');
+      // Llamada real a tu API
+      const response = await axios.post('http://localhost:3000/api/auth/login', {
+        email: formData.email,
+        password: formData.password
+      }, {
+        withCredentials: true // Para manejar cookies/sessions
+      });
+
+      if (response.status === 200 && response.data) {
+        // Usar los datos del usuario para actualizar el contexto
+        const userData = {
+          email: response.data.email,
+          id: response.data.id,
+          nombre: response.data.nombre,
+          apellido: response.data.apellido
+        };
+
+        login(userData);
+        // La navegación se maneja en el useEffect
       }
+    } catch (error: any) {
+      console.error('Error durante el login:', error);
       
-    } catch (error) {
-      setError('Error al iniciar sesión. Intenta nuevamente.');
-      console.error('Error de login:', error);
+      if (error.response) {
+        // El servidor respondió con un error
+        switch (error.response.status) {
+          case 401:
+            setError('Credenciales incorrectas. Verifica tu email y contraseña.');
+            break;
+          case 404:
+            setError('Usuario no encontrado.');
+            break;
+          case 500:
+            setError('Error del servidor. Intenta más tarde.');
+            break;
+          default:
+            setError('Error de autenticación. Intenta de nuevo.');
+        }
+      } else if (error.request) {
+        // Fallback a login simulado para desarrollo
+        console.log('No se pudo conectar al servidor, usando login simulado');
+        
+        // Login simulado (remover cuando tengas backend)
+        if (formData.email === 'admin@test.com' && formData.password === '123456') {
+          const mockUser = {
+            email: formData.email,
+            id: 1,
+            nombre: 'Usuario',
+            apellido: 'Demo'
+          };
+          login(mockUser);
+        } else {
+          setError('Credenciales incorrectas. Intenta con admin@test.com / 123456');
+        }
+      } else {
+        setError('Error inesperado. Intenta de nuevo.');
+      }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Mostrar loading mientras se verifica autenticación
+  if (loading) {
+    return (
+      <main className="container">
+        <section className="hero">
+          <h1>Verificando sesión...</h1>
+          <div className="loading-spinner">
+            <i className="fas fa-spinner fa-spin"></i>
+          </div>
+        </section>
+      </main>
+    );
+  }
 
   return (
     <>
@@ -130,11 +197,11 @@ const handleSubmit = async (e: React.FormEvent) => {
           </div>
           
           <div className="social-login">
-            <button className="btn btn-outline btn-google">
+            <button className="btn btn-outline btn-google" type="button">
               <i className="fab fa-google"></i>
               Continuar con Google
             </button>
-            <button className="btn btn-outline btn-facebook">
+            <button className="btn btn-outline btn-facebook" type="button">
               <i className="fab fa-facebook-f"></i>
               Continuar con Facebook
             </button>
@@ -142,7 +209,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         </section>
 
         <section className="auth-redirect">
-          <p>¿No tienes cuenta? <a href="#" className="link-primary">Regístrate aquí</a></p>
+          <p>¿No tienes cuenta? <a href="./register" className="link-primary">Regístrate aquí</a></p>
         </section>
 
         <section className="features">
