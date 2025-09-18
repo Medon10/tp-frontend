@@ -3,6 +3,22 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { validateEmail } from '../../ValidateFunctions/ValidateFormMail';
+import { validatePassword } from '../../ValidateFunctions/ValidateFormPass';
+
+type UserData = {
+  email: string;
+  password: string;
+  id: number;
+  nombre: string;
+  apellido: string;
+};
+
+type ValidationErrors = {
+  email?: string;
+  password?: string;
+  general?: string;
+};
 
 export const Login: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -11,16 +27,19 @@ export const Login: React.FC = () => {
   });
 
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<ValidationErrors>({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const { login, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Obtener la ruta de donde venía el usuario
   const from = location.state?.from?.pathname || '/perfil';
+  
+  // Variables de configuración
+  const isDevelopment = window.location.hostname === 'localhost';
 
-  // Si ya está autenticado, redirigir
+  // Redirigir si ya está autenticado
   useEffect(() => {
     if (isAuthenticated && !loading) {
       navigate(from, { replace: true });
@@ -29,89 +48,170 @@ export const Login: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
+    
+    // Sanitizar email (convertir a minúsculas)
+    const sanitizedValue = id === 'email' ? value.trim().toLowerCase() : value;
+    
     setFormData(prev => ({
       ...prev,
-      [id]: value
+      [id]: sanitizedValue
     }));
-    // Limpiar error cuando el usuario empiece a escribir
-    if (error) setError('');
+
+    // Limpiar errores específicos cuando el usuario escribe
+    if (errors[id as keyof ValidationErrors]) {
+      const newErrors = { ...errors };
+      delete newErrors[id as keyof ValidationErrors];
+      setErrors(newErrors);
+    }
+
+    // Limpiar error general
+    if (errors.general) {
+      setErrors(prev => ({ ...prev, general: undefined }));
+    }
+  };
+
+  const validateForm = (): boolean => {
+    const newErrors: ValidationErrors = {};
+
+    // Validar email
+    const emailValidation = validateEmail(formData.email);
+    if (!emailValidation.isValid) {
+      newErrors.email = emailValidation.message;
+    }
+
+    // Validar contraseña
+    const passwordValidation = validatePassword(formData.password);
+    if (!passwordValidation.isValid) {
+      newErrors.password = passwordValidation.message;
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.email || !formData.password) {
-      setError('Por favor completa todos los campos');
+    // Validar formulario
+    if (!validateForm()) {
       return;
     }
 
     setIsLoading(true);
-    setError('');
+    setErrors({});
+
+
+    // Debug - ver qué se está enviando
+    console.log('Enviando a:', `http://localhost:3000/api/users/login`);
+    console.log('Datos a enviar:', {
+      email: formData.email,
+      password: formData.password
+    });
 
     try {
-      // Llamada real a tu API
-      const response = await axios.post('http://localhost:3000/api/auth/login', {
-        email: formData.email,
-        password: formData.password
-      }, {
-        withCredentials: true // Para manejar cookies/sessions
-      });
+      interface LoginResponse {
+        user?: UserData;
+        message?: string;
+      }
 
-      if (response.status === 200 && response.data) {
-        // Usar los datos del usuario para actualizar el contexto
-        const userData = {
-          email: response.data.email,
-          id: response.data.id,
-          nombre: response.data.nombre,
-          apellido: response.data.apellido
-        };
+      const response = await axios.post<LoginResponse>(
+        `api/users/login`,
+        {
+          email: formData.email,
+          password: formData.password
+        },
+        {
+          withCredentials: true,
+          timeout: 5000,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },  
+          validateStatus: function (status) {
+            return status < 500;
+        }
+        }
+      );
 
+      console.log('Respuesta del servidor:', response.data);
+
+      if (response.status === 200 && response.data.user) {
+        const userData = response.data.user!;
         login(userData);
-        // La navegación se maneja en el useEffect
+        console.log('Login exitoso:', userData);
       }
     } catch (error: any) {
-      console.error('Error durante el login:', error);
+      console.error('Error completo:', error);
+      console.error('Error response:', error.response);
+      console.error('Error request:', error.request);
+      console.error('Error message:', error.message);
       
-      if (error.response) {
-        // El servidor respondió con un error
-        switch (error.response.status) {
+      if (error.code === 'ECONNABORTED') {
+        setErrors({ general: 'La conexión tardó demasiado. Intenta de nuevo.' });
+      } else if (error.response) {
+        const status = error.response.status;
+        const serverMessage = error.response.data?.message;
+        
+        console.log('Status:', status, 'Message:', serverMessage);
+        
+        switch (status) {
+          case 400:
+            setErrors({ general: serverMessage || 'Datos de entrada inválidos.' });
+            break;
           case 401:
-            setError('Credenciales incorrectas. Verifica tu email y contraseña.');
+            setErrors({ general: 'Email o contraseña incorrectos.' });
             break;
           case 404:
-            setError('Usuario no encontrado.');
+            setErrors({ general: 'Usuario no encontrado.' });
+            break;
+          case 429:
+            setErrors({ general: 'Demasiados intentos. Intenta más tarde.' });
             break;
           case 500:
-            setError('Error del servidor. Intenta más tarde.');
+            setErrors({ general: 'Error del servidor. Intenta más tarde.' });
             break;
           default:
-            setError('Error de autenticación. Intenta de nuevo.');
+            setErrors({ general: serverMessage || 'Error de autenticación.' });
         }
       } else if (error.request) {
-        // Fallback a login simulado para desarrollo
-        console.log('No se pudo conectar al servidor, usando login simulado');
+        console.log('No hay respuesta del servidor');
+        console.log('Request config:', error.config);
         
-        // Login simulado (remover cuando tengas backend)
-        if (formData.email === 'admin@test.com' && formData.password === '123456') {
-          const mockUser = {
-            email: formData.email,
-            id: 1,
-            nombre: 'Usuario',
-            apellido: 'Demo'
-          };
-          login(mockUser);
+        // Fallback solo en desarrollo
+        if (isDevelopment) {
+          console.log('Modo desarrollo: usando credenciales demo');
+          
+          if (formData.email === 'admin@test.com' && formData.password === '123456') {
+            const mockUser: UserData = {
+              email: formData.email,
+              password: formData.password,
+              id: 15,
+              nombre: 'Usuario',
+              apellido: 'Demo'
+            };
+            login(mockUser);
+          } else {
+            setErrors({ 
+              general: 'Sin conexión al servidor. Verifica que esté corriendo en el puerto 3000' 
+            });
+          }
         } else {
-          setError('Credenciales incorrectas. Intenta con admin@test.com / 123456');
+          setErrors({ 
+            general: 'Sin conexión al servidor. Verifica tu conexión a internet.' 
+          });
         }
       } else {
-        setError('Error inesperado. Intenta de nuevo.');
+        setErrors({ general: 'Error inesperado. Intenta de nuevo.' });
       }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Mostrar loading mientras se verifica autenticación
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
   if (loading) {
     return (
       <main className="container">
@@ -137,15 +237,23 @@ export const Login: React.FC = () => {
 
         <section className="budget-form">
           <form onSubmit={handleSubmit}>
-            {error && (
+            {errors.general && (
               <div className="error-message">
                 <i className="fas fa-exclamation-triangle"></i>
-                {error}
+                {errors.general}
               </div>
             )}
             
             <div className="form-group">
-              <label htmlFor="email">Correo electrónico</label>
+              <label htmlFor="email">
+                Correo electrónico
+                {errors.email && (
+                  <span className="field-error">
+                    <i className="fas fa-exclamation-circle"></i>
+                    {errors.email}
+                  </span>
+                )}
+              </label>
               <input
                 type="email"
                 id="email"
@@ -154,20 +262,44 @@ export const Login: React.FC = () => {
                 value={formData.email}
                 onChange={handleInputChange}
                 disabled={isLoading}
+                className={errors.email ? 'error' : ''}
+                maxLength={255}
+                autoComplete="email"
               />
             </div>
             
             <div className="form-group">
-              <label htmlFor="password">Contraseña</label>
-              <input
-                type="password"
-                id="password"
-                required
-                placeholder="Tu contraseña"
-                value={formData.password}
-                onChange={handleInputChange}
-                disabled={isLoading}
-              />
+              <label htmlFor="password">
+                Contraseña
+                {errors.password && (
+                  <span className="field-error">
+                    <i className="fas fa-exclamation-circle"></i>
+                    {errors.password}
+                  </span>
+                )}
+              </label>
+              <div className="password-input-wrapper">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  required
+                  placeholder="Tu contraseña"
+                  value={formData.password}
+                  onChange={handleInputChange}
+                  disabled={isLoading}
+                  className={errors.password ? 'error' : ''}
+                  autoComplete="current-password"
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={togglePasswordVisibility}
+                  disabled={isLoading}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                </button>
+              </div>
             </div>
             
             <button 
@@ -197,11 +329,19 @@ export const Login: React.FC = () => {
           </div>
           
           <div className="social-login">
-            <button className="btn btn-outline btn-google" type="button">
+            <button 
+              className="btn btn-outline btn-google" 
+              type="button"
+              disabled={isLoading}
+            >
               <i className="fab fa-google"></i>
               Continuar con Google
             </button>
-            <button className="btn btn-outline btn-facebook" type="button">
+            <button 
+              className="btn btn-outline btn-facebook" 
+              type="button"
+              disabled={isLoading}
+            >
               <i className="fab fa-facebook-f"></i>
               Continuar con Facebook
             </button>
@@ -236,12 +376,14 @@ export const Login: React.FC = () => {
           </div>
         </section>
       </main>
-
-      {/* Demo credentials banner */}
-      <div className="demo-credentials">
-        <i className="fas fa-info-circle"></i>
-        <span><strong>Demo:</strong> admin@test.com / 123456</span>
-      </div>
+/*
+      {/* Demo credentials banner - solo en desarrollo */}
+  /*    {isDevelopment && (
+        <div className="demo-credentials">
+          <i className="fas fa-info-circle"></i>
+          <span><strong>Demo:</strong> admin@test.com / 123456</span>
+        </div>
+      )}
     </>
   );
-};
+}; 
