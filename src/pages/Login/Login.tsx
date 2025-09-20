@@ -127,9 +127,6 @@ export const Login: React.FC = () => {
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           },  
-          validateStatus: function (status) {
-            return status < 500;
-        }
         }
       );
 
@@ -152,7 +149,8 @@ export const Login: React.FC = () => {
         const status = error.response.status;
         const serverMessage = error.response.data?.message;
         
-        console.log('Status:', status, 'Message:', serverMessage);
+        console.log('Status de error:', status);
+        console.log('Mensaje del servidor:', serverMessage);
         
         switch (status) {
           case 400:
