@@ -325,25 +325,6 @@ export const Login: React.FC = () => {
           <div className="auth-divider">
             <span>o</span>
           </div>
-          
-          <div className="social-login">
-            <button 
-              className="btn btn-outline btn-google" 
-              type="button"
-              disabled={isLoading}
-            >
-              <i className="fab fa-google"></i>
-              Continuar con Google
-            </button>
-            <button 
-              className="btn btn-outline btn-facebook" 
-              type="button"
-              disabled={isLoading}
-            >
-              <i className="fab fa-facebook-f"></i>
-              Continuar con Facebook
-            </button>
-          </div>
         </section>
 
         <section className="auth-redirect">
@@ -354,23 +335,14 @@ export const Login: React.FC = () => {
           <div className="feature">
             <i className="fas fa-shield-alt"></i>
             <h3>Seguridad Garantizada</h3>
-            <p>
-              Tus datos están protegidos con encriptación de última generación.
-            </p>
           </div>
           <div className="feature">
             <i className="fas fa-clock"></i>
             <h3>Acceso 24/7</h3>
-            <p>
-              Gestiona tus viajes en cualquier momento desde cualquier dispositivo.
-            </p>
           </div>
           <div className="feature">
             <i className="fas fa-heart"></i>
             <h3>Favoritos Guardados</h3>
-            <p>
-              Mantén tus destinos favoritos sincronizados en todos tus dispositivos.
-            </p>
           </div>
         </section>
       </main>

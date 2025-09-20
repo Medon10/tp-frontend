@@ -70,24 +70,14 @@ return (
         <div className="feature">
             <i className="fas fa-globe"></i>
             <h3>Destinos Globales</h3>
-            <p>
-            Accede a más de 500 destinos en todo el mundo con un solo clic.
-            </p>
         </div>
         <div className="feature">
             <i className="fas fa-hand-holding-usd"></i>
             <h3>Mejor Precio Garantizado</h3>
-            <p>
-            Encuentra los mejores precios para tu presupuesto sin comprometer
-            calidad.
-        </p>
         </div>
         <div className="feature">
-            <i className="fas fa-box-open"></i>
-            <h3>Paquetes Todo Incluido</h3>
-            <p>
-            Vuelos, hospedaje, transporte y actividades en un solo lugar.
-        </p>
+            <i className="fas fa-computer"></i>
+            <h3>Planeá tu viaje</h3>
         </div>
         </section>
     </main>

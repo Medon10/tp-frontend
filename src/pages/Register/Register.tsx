@@ -433,14 +433,6 @@ export const Register: React.FC = () => {
                 'Crear Cuenta'
               )}
             </button>
-            
-            <div className="form-terms">
-              <p>
-                Al crear tu cuenta aceptas nuestros{' '}
-                <a href="#" className="link">Términos de Servicio</a> y{' '}
-                <a href="#" className="link">Política de Privacidad</a>
-              </p>
-            </div>
           </form>
         </section>
 
@@ -448,53 +440,10 @@ export const Register: React.FC = () => {
           <div className="auth-divider">
             <span>o</span>
           </div>
-          
-          <div className="social-login">
-            <button 
-              className="btn btn-outline btn-google" 
-              type="button"
-              disabled={isLoading}
-            >
-              <i className="fab fa-google"></i>
-              Registrarse con Google
-            </button>
-            <button 
-              className="btn btn-outline btn-facebook" 
-              type="button"
-              disabled={isLoading}
-            >
-              <i className="fab fa-facebook-f"></i>
-              Registrarse con Facebook
-            </button>
-          </div>
         </section>
 
         <section className="auth-redirect">
           <p>¿Ya tienes cuenta? <a href="./login" className="link-primary">Inicia sesión aquí</a></p>
-        </section>
-
-        <section className="features">
-          <div className="feature">
-            <i className="fas fa-user-shield"></i>
-            <h3>Perfil Personalizado</h3>
-            <p>
-              Crea tu perfil y recibe recomendaciones adaptadas a tus gustos.
-            </p>
-          </div>
-          <div className="feature">
-            <i className="fas fa-bookmark"></i>
-            <h3>Guarda Favoritos</h3>
-            <p>
-              Marca destinos como favoritos y accede a ellos cuando quieras.
-            </p>
-          </div>
-          <div className="feature">
-            <i className="fas fa-bell"></i>
-            <h3>Alertas de Ofertas</h3>
-            <p>
-              Recibe notificaciones de ofertas especiales en tus destinos preferidos.
-            </p>
-          </div>
         </section>
       </main>
 
