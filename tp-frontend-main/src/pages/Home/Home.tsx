@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
 import { setHours, setMinutes } from 'date-fns';
 import { api } from '../../services/api';
@@ -35,6 +36,7 @@ interface SearchFilters {
 }
 
 export const Home: React.FC = () => {
+  const navigate = useNavigate();
   const [dateTimeRange, setDateTimeRange] = useState<DateTimeRange>({
     startDateTime: setHours(setMinutes(new Date(), 0), 9),
     endDateTime: null
@@ -220,6 +222,19 @@ export const Home: React.FC = () => {
     const hours = Math.floor(duration / 60);
     const minutes = duration % 60;
     return minutes > 0 ? `${hours}h ${minutes}m` : `${hours}h`;
+  };
+
+  const handleBookFlight = (flight: Flight) => {
+    const totalPrice = flight.montoVuelo * searchFilters.travelers;
+    
+    // Navigate to checkout with flight data
+    navigate('/checkout', {
+      state: {
+        flight,
+        travelers: searchFilters.travelers,
+        totalPrice
+      }
+    });
   };
 
   return (
@@ -455,7 +470,10 @@ export const Home: React.FC = () => {
                       )}
                     </div>
                     
-                    <button className="btn btn-book">
+                    <button 
+                      className="btn btn-book"
+                      onClick={() => handleBookFlight(flight)}
+                    >
                       <i className="fas fa-ticket-alt"></i>
                       Reservar Ahora
                     </button>
