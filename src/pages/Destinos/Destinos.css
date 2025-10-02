@@ -1,0 +1,449 @@
+/* Destinos.css */
+
+.destinos-page {
+  min-height: 100vh;
+  background: #f7f9fc;
+}
+
+/* Hero Section */
+.destinos-hero {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  padding: 4rem 0 3rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.destinos-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="40" fill="white" opacity="0.05"/></svg>');
+  opacity: 0.1;
+}
+
+.destinos-hero h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  position: relative;
+  z-index: 1;
+}
+
+.destinos-hero p {
+  font-size: 1.3rem;
+  opacity: 0.95;
+  margin-bottom: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.destinos-stats {
+  display: flex;
+  justify-content: center;
+  gap: 3rem;
+  margin-top: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.stat i {
+  font-size: 1.5rem;
+  opacity: 0.9;
+}
+
+/* Content Section */
+.destinos-content {
+  padding: 3rem 0;
+}
+
+/* Grid de destinos */
+.destinos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+/* Card de destino */
+.destino-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.destino-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+}
+
+.destino-image {
+  height: 240px;
+  background-size: cover;
+  background-position: center;
+  position: relative;
+}
+
+.destino-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.2), transparent);
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.destino-card:hover .destino-overlay {
+  opacity: 1;
+}
+
+.btn-favorite {
+  background: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.btn-favorite:hover {
+  background: var(--accent);
+  color: white;
+  transform: scale(1.1);
+}
+
+.btn-favorite i {
+  font-size: 1.2rem;
+}
+
+.destino-content {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.destino-title {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+  color: var(--dark);
+  font-weight: 600;
+}
+
+.destino-info {
+  margin-bottom: 1rem;
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  color: #666;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.info-label i {
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tag {
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: inline-block;
+}
+
+.tag-transport {
+  background: rgba(58, 134, 255, 0.1);
+  color: var(--primary);
+}
+
+.tag-activity {
+  background: rgba(131, 56, 236, 0.1);
+  color: var(--secondary);
+}
+
+.destino-actions {
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 0.8rem;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+}
+
+/* Paginación */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 2rem 0 1rem;
+}
+
+.pagination-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: white;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-numbers {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: white;
+  color: var(--dark);
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.pagination-number:hover {
+  background: rgba(58, 134, 255, 0.1);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.pagination-number.active {
+  background: var(--primary);
+  color: white;
+  border-color: var(--primary);
+}
+
+.pagination-info {
+  text-align: center;
+  color: #666;
+  font-size: 0.9rem;
+  margin-bottom: 2rem;
+}
+
+/* No results */
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.no-results i {
+  font-size: 4rem;
+  color: var(--primary);
+  opacity: 0.3;
+  margin-bottom: 1rem;
+}
+
+.no-results h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: var(--dark);
+}
+
+.no-results p {
+  color: #666;
+  font-size: 1.1rem;
+}
+
+/* Call to action */
+.destinos-cta {
+  background: linear-gradient(135deg, rgba(58, 134, 255, 0.05), rgba(131, 56, 236, 0.05));
+  padding: 4rem 0;
+  margin-top: 3rem;
+}
+
+.cta-content {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.cta-content h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--dark);
+}
+
+.cta-content p {
+  font-size: 1.1rem;
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.btn-large {
+  padding: 1rem 2.5rem;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 500;
+}
+
+.btn-large:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(58, 134, 255, 0.3);
+}
+
+/* Error message */
+.error-message {
+  background: #ffe6e6;
+  border: 1px solid #ff4444;
+  color: #cc0000;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+
+.error-message i {
+  font-size: 1.2rem;
+}
+
+/* Loading */
+.loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 5px solid var(--gray);
+  border-top-color: var(--primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 2rem auto;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .destinos-hero h1 {
+    font-size: 2rem;
+  }
+
+  .destinos-hero p {
+    font-size: 1.1rem;
+  }
+
+  .destinos-stats {
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .destinos-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .pagination-numbers {
+    gap: 0.3rem;
+  }
+
+  .pagination-number,
+  .pagination-btn {
+    width: 35px;
+    height: 35px;
+    font-size: 0.9rem;
+  }
+
+  .cta-content h2 {
+    font-size: 1.5rem;
+  }
+
+  .cta-content p {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .destinos-hero {
+    padding: 2rem 0 1.5rem;
+  }
+
+  .destino-image {
+    height: 200px;
+  }
+
+  .destino-content {
+    padding: 1rem;
+  }
+
+  .destino-title {
+    font-size: 1.3rem;
+  }
+}

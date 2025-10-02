@@ -6,7 +6,8 @@ import { Home } from './pages/Home/Home.tsx';
 import { Login } from './pages/Login/Login.tsx';
 import { Perfil } from './pages/Perfil/Perfil.tsx';
 import { Register } from './pages/Register/Register.tsx';
-// Importar otras páginas cuando las crees
+import { Destinos } from './pages/Destinos/Destinos.tsx';
+
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/perfil" element={<Perfil />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/destinos" element={<Destinos />} />
           {/* Otras rutas irán aquí */}
         </Routes>
         

@@ -264,7 +264,7 @@ export const Register: React.FC = () => {
         <section className="hero">
           <h1>Crear Cuenta</h1>
           <p>
-            Únete a VacationMatch y descubre increíbles destinos personalizados
+            Únete a VacationMatch y descubre increíbles destinos
           </p>
         </section>
 
