@@ -7,7 +7,7 @@
 
 /* Hero Section */
 .destinos-hero {
-  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  background: linear-gradient(135deg, #234e8a, #7CE0D3);
   color: white;
   padding: 4rem 0 3rem;
   text-align: center;
@@ -115,30 +115,6 @@
 
 .destino-card:hover .destino-overlay {
   opacity: 1;
-}
-
-.btn-favorite {
-  background: white;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-
-.btn-favorite:hover {
-  background: var(--accent);
-  color: white;
-  transform: scale(1.1);
-}
-
-.btn-favorite i {
-  font-size: 1.2rem;
 }
 
 .destino-content {

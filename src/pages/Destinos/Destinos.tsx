@@ -137,9 +137,6 @@ export const Destinos: React.FC = () => {
                       style={{ backgroundImage: `url(${getImageUrl(destino.imagen)})` }}
                     >
                       <div className="destino-overlay">
-                        <button className="btn-favorite" aria-label="Agregar a favoritos">
-                          <i className="far fa-heart"></i>
-                        </button>
                       </div>
                     </div>
                     

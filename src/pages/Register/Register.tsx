@@ -366,22 +366,13 @@ export const Register: React.FC = () => {
                   type={showPassword ? "text" : "password"}
                   id="password"
                   required
-                  placeholder="Mínimo 6 caracteres con mayúscula, minúscula y número"
+                  placeholder="Mínimo 6 caracteres"
                   value={formData.password}
                   onChange={handleInputChange}
                   disabled={isLoading}
                   className={errors.password ? 'error' : ''}
                   autoComplete="new-password"
                 />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={togglePasswordVisibility}
-                  disabled={isLoading}
-                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                >
-                  <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                </button>
               </div>
             </div>
             
@@ -407,15 +398,6 @@ export const Register: React.FC = () => {
                   className={errors.confirmPassword ? 'error' : ''}
                   autoComplete="new-password"
                 />
-                <button
-                  type="button"
-                  className="password-toggle"
-                  onClick={toggleConfirmPasswordVisibility}
-                  disabled={isLoading}
-                  aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                >
-                  <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
-                </button>
               </div>
             </div>
             
