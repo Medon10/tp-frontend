@@ -1,6 +1,7 @@
 import './Destinos.css';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 
 interface Destino {
   id: number;
@@ -21,6 +22,8 @@ export const Destinos: React.FC = () => {
     fetchDestinos();
   }, []);
 
+  const navigate = useNavigate();
+  
   const fetchDestinos = async () => {
     setIsLoading(true);
     setError('');
@@ -178,7 +181,7 @@ export const Destinos: React.FC = () => {
                       <div className="destino-actions">
                         <button 
                           className="btn btn-primary"
-                          onClick={() => window.location.href = `/destinos/${destino.id}`}
+                          onClick={() => navigate(`/destinos/${destino.id}`)}
                         >
                           Ver detalles
                         </button>
