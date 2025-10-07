@@ -8,11 +8,13 @@ import { Perfil } from './pages/Perfil/Perfil.tsx';
 import { Register } from './pages/Register/Register.tsx';
 import { Destinos } from './pages/Destinos/Destinos.tsx';
 import { DetalleDestino } from './pages/DetalleDestino/DetalleDestino.tsx';
+import { FavoritesProvider } from './context/FavoriteContext.tsx';
 
 
 export default function App() {
   return (
   <AuthProvider>
+    <FavoritesProvider>
     <Router>
       <>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></link>
@@ -32,6 +34,7 @@ export default function App() {
         <Footer />
       </>
     </Router>
+    </FavoritesProvider>
   </AuthProvider>
   );
 }

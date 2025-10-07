@@ -2,6 +2,8 @@ import './DetalleDestino.css';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+import { useFavorites } from '../../context/FavoriteContext';
 
 interface Destino {
   id: number;
@@ -33,6 +35,28 @@ export const DetalleDestino: React.FC = () => {
   const [error, setError] = useState('');
   const [filtroAerolinea, setFiltroAerolinea] = useState('todas');
   const [ordenPrecio, setOrdenPrecio] = useState<'asc' | 'desc' | 'none'>('none');
+
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+  const { isAuthenticated } = useAuth();
+
+  const handleToggleFavorite = async (flightId: number) => {
+    if (!isAuthenticated) {
+      alert('Debes iniciar sesión para guardar favoritos');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      if (isFavorite(flightId)) {
+        await removeFavorite(flightId);
+      } else {
+        await addFavorite(flightId);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error al actualizar favoritos');
+    }
+  };
 
   useEffect(() => {
     fetchDestinoYVuelos();
@@ -230,11 +254,11 @@ export const DetalleDestino: React.FC = () => {
                       <span>{vuelo.aerolinea}</span>
                     </div>
                     <button 
-                      className="btn-favorite-vuelo"
-                      aria-label="Agregar a favoritos"
-                      title="Guardar vuelo"
-                    >
-                      <i className="far fa-heart"></i>
+                      className={`btn-favorite-vuelo ${isFavorite(vuelo.id) ? 'active' : ''}`}
+                      onClick={() => handleToggleFavorite(vuelo.id)}
+                      aria-label={isFavorite(vuelo.id) ? "Quitar de favoritos" : "Agregar a favoritos"}
+                      >
+                      <i className={isFavorite(vuelo.id) ? 'fas fa-heart' : 'far fa-heart'}></i>
                     </button>
                   </div>
 

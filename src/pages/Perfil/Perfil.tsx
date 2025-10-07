@@ -7,7 +7,7 @@ export const Perfil: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   
-  // Datos adicionales que podrías obtener de tu API
+
   const [userStats] = useState({
     fechaRegistro: '2023-03-15',
     viajesCompletados: 2,

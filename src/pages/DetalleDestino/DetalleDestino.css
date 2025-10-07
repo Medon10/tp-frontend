@@ -394,6 +394,19 @@
   font-weight: bold;
 }
 
+.btn-favorite-vuelo.active {
+  color: var(--accent);
+}
+
+.btn-favorite-vuelo.active i {
+  animation: heartbeat 0.3s;
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .destino-hero-large {

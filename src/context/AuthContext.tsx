@@ -1,4 +1,3 @@
-// src/context/AuthContext.tsx
 import { createContext, useState, useContext, useEffect, type ReactElement } from "react";
 import axios from "axios";
 
@@ -13,8 +12,6 @@ type AuthContextType = {
   user: User | null;
   login: (userData: User) => void;
   logout: () => void;
-  existsToken: boolean;
-  checkToken: () => Promise<void>;
   isAuthenticated: boolean;
   loading: boolean;
 };
@@ -22,66 +19,54 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactElement }) => {
-  const [user, setUser] = useState<User | null>({
-    email: "dev@test.com",
-    id: 1,
-    nombre: "Mateo",
-    apellido: "Medon"
-  });
-  const [existsToken, setExistsToken] = useState<boolean>(false);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [user, setUser] = useState<User | null>(null); 
+  const [loading, setLoading] = useState<boolean>(true); 
 
   const login = (userData: User) => {
     setUser(userData);
-    setExistsToken(true);
-    
   };
 
-  const logout = () => {
-    setUser(null);
-    setExistsToken(false);
-    // También se podría hacer una llamada al backend para invalidar el token
-    // axios.post('http://localhost:3000/api/auth/logout', {}, {withCredentials: true});
+  const logout = async () => {
+    try {
+      // Llamar al backend para limpiar la cookie
+      await axios.post('/api/users/logout', {}, { withCredentials: true });
+    } catch (error) {
+      console.error('Error en logout:', error);
+    } finally {
+      setUser(null);
+    }
   };
 
-  const checkToken = async () => {
+  const checkAuth = async () => {
     try {
       setLoading(true);
-      const response = await axios.post<User>('http://localhost:3000/api/cliente/verify', {}, { 
+      const response = await axios.get('/api/users/profile/me', { 
         withCredentials: true,
         timeout: 5000
       });
       
-      if (response.status === 200 && response.data) {
-        setExistsToken(true);
-        setUser({
-          email: response.data.email,
-          id: response.data.id,
-          nombre: response.data.nombre,
-          apellido: response.data.apellido,
-        });
+      const data = response.data as { data: User };
+      if (response.status === 200 && data.data) {
+        setUser(data.data);
       }
     } catch (error) {
-      console.error('Error verificando token:', error);
-      setExistsToken(false);
+      console.error('Error verificando autenticación:', error);
       setUser(null);
     } finally {
       setLoading(false);
     }
   };
 
-  // Verificar token al cargar la aplicación
-//  useEffect(() => {
-//    checkToken();
-//  }, []);
+  // Verificar autenticación al cargar
+  useEffect(() => {
+    checkAuth();
+  }, []);
 
   const value: AuthContextType = {
     user,
     login,
     logout,
-    existsToken,
-    checkToken,
-    isAuthenticated: existsToken && user !== null,
+    isAuthenticated: user !== null,
     loading
   };
 
@@ -92,13 +77,10 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
   );
 };
 
-const useAuth = () => {
+export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
     throw new Error("useAuth debe usarse dentro de AuthProvider");
   }
   return context;
 };
-
-export { useAuth };
-export default useAuth;
