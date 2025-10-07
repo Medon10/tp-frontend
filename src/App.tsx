@@ -9,6 +9,7 @@ import { Register } from './pages/Register/Register.tsx';
 import { Destinos } from './pages/Destinos/Destinos.tsx';
 import { DetalleDestino } from './pages/DetalleDestino/DetalleDestino.tsx';
 import { FavoritesProvider } from './context/FavoriteContext.tsx';
+import { Favoritos } from './pages/Favoritos/Favoritos.tsx';
 
 
 export default function App() {
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/destinos" element={<Destinos />} />
           <Route path="/destinos/:id" element={<DetalleDestino />} />
+          <Route path="/favoritos" element={<Favoritos />} />
           {/* Otras rutas irán aquí */}
         </Routes>
         
