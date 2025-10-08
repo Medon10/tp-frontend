@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DatePicker from 'react-datepicker';
-import { setHours, setMinutes } from 'date-fns';
+import { setHours, setMinutes, startOfDay, endOfDay, format } from 'date-fns';
 import { api } from '../../services/api';
 import 'react-datepicker/dist/react-datepicker.css';
 import './Home.css';
@@ -25,10 +25,9 @@ interface Flight {
   updatedAt: string;
 }
 
-interface DateTimeRange {
+type OneWayDateTime = {
   startDateTime: Date | null;
-  endDateTime: Date | null;
-}
+};
 
 interface SearchFilters {
   budget: number;
@@ -37,9 +36,8 @@ interface SearchFilters {
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
-  const [dateTimeRange, setDateTimeRange] = useState<DateTimeRange>({
-    startDateTime: setHours(setMinutes(new Date(), 0), 9),
-    endDateTime: null
+  const [dateTimeRange, setDateTimeRange] = useState<OneWayDateTime>({
+    startDateTime: setHours(setMinutes(new Date(), 0), 9)
   });
   const [searchFilters, setSearchFilters] = useState<SearchFilters>({
     budget: 1500,
@@ -56,36 +54,10 @@ export const Home: React.FC = () => {
     return currentDate.getTime() < selectedDate.getTime();
   };
 
-  const filterPassedTimeForEndDate = (time: Date) => {
-    const currentDate = new Date();
-    const selectedDate = new Date(time);
-    
-    // If start date is selected, end time should be after start time
-    if (dateTimeRange.startDateTime) {
-      return selectedDate.getTime() > dateTimeRange.startDateTime.getTime();
-    }
-    
-    return currentDate.getTime() < selectedDate.getTime();
-  };
 
-  const handleDateTimeChange = (field: keyof DateTimeRange, value: Date | null) => {
-    setDateTimeRange(prev => ({
-      ...prev,
-      [field]: value
-    }));
-    
-    // If changing start date and it's after end date, reset end date
-    if (field === 'startDateTime' && value && dateTimeRange.endDateTime) {
-      if (value.getTime() >= dateTimeRange.endDateTime.getTime()) {
-        setDateTimeRange(prev => ({
-          ...prev,
-          [field]: value,
-          endDateTime: null
-        }));
-      }
-    }
-    
-    // Reset search state when dates change
+  const handleDateTimeChange = (value: Date | null) => {
+    setDateTimeRange({ startDateTime: value });
+    // Reset search state when date changes
     setHasSearched(false);
     setError(null);
   };
@@ -102,19 +74,10 @@ export const Home: React.FC = () => {
   };
 
   const validateDateTime = (): string | null => {
-    if (!dateTimeRange.startDateTime || !dateTimeRange.endDateTime) {
-      return 'Por favor selecciona ambas fechas y horas';
+    if (!dateTimeRange.startDateTime) {
+      return 'Por favor selecciona la fecha y hora de salida';
     }
-
-    if (dateTimeRange.startDateTime >= dateTimeRange.endDateTime) {
-      return 'La fecha y hora de inicio debe ser anterior a la de fin';
-    }
-
-    const now = new Date();
-    if (dateTimeRange.startDateTime <= now) {
-      return 'La fecha y hora de salida debe ser posterior al momento actual';
-    }
-
+    // Permitimos buscar fechas pasadas por si los datos de prueba están en el pasado
     return null;
   };
 
@@ -140,14 +103,16 @@ export const Home: React.FC = () => {
     setHasSearched(true);
 
     try {
-      // Format dates for backend API (YYYY-MM-DD format)
-      const fechaInicio = dateTimeRange.startDateTime!.toISOString().split('T')[0];
-      const fechaFin = dateTimeRange.endDateTime!.toISOString().split('T')[0];
+      // Build inclusive datetime window for the backend for the selected day (YYYY-MM-DD HH:mm)
+      const start = startOfDay(dateTimeRange.startDateTime!);
+      const end = endOfDay(dateTimeRange.startDateTime!);
+      const fechaInicio = format(start, 'yyyy-MM-dd HH:mm');
+      const fechaFin = format(end, 'yyyy-MM-dd HH:mm');
       
-      console.log('Searching flights from', fechaInicio, 'to', fechaFin);
+      console.log(`Searching flights on ${fechaInicio.split(' ')[0]} (full day)`);
       
-      // Use backend filtering for dates
-      const response = await api.get(`/flights?fechaInicio=${fechaInicio}&fechaFin=${fechaFin}`);
+      // Use backend filtering for the single-day range
+      const response = await api.get(`/flights?fechaInicio=${encodeURIComponent(fechaInicio)}&fechaFin=${encodeURIComponent(fechaFin)}`);
       const data = response.data as { data: Flight[] };
       const backendFilteredFlights: Flight[] = Array.isArray(data.data) ? data.data : [];
       
@@ -175,8 +140,7 @@ export const Home: React.FC = () => {
 
   const clearSearch = () => {
     setDateTimeRange({ 
-      startDateTime: setHours(setMinutes(new Date(), 0), 9),
-      endDateTime: null
+      startDateTime: setHours(setMinutes(new Date(), 0), 9)
     });
     setSearchFilters({ budget: 1500, travelers: 2 });
     setFlights([]);
@@ -253,7 +217,7 @@ export const Home: React.FC = () => {
               <label>Fecha y hora de salida</label>
               <DatePicker
                 selected={dateTimeRange.startDateTime}
-                onChange={(date) => handleDateTimeChange('startDateTime', date)}
+                onChange={(date) => handleDateTimeChange(date)}
                 showTimeSelect
                 filterTime={filterPassedTime}
                 dateFormat="MMMM d, yyyy h:mm aa"
@@ -265,25 +229,6 @@ export const Home: React.FC = () => {
               />
             </div>
 
-            <div className="datetime-separator">
-              <i className="fas fa-arrow-right"></i>
-            </div>
-
-            <div className="datetime-group">
-              <label>Fecha y hora límite de regreso</label>
-              <DatePicker
-                selected={dateTimeRange.endDateTime}
-                onChange={(date) => handleDateTimeChange('endDateTime', date)}
-                showTimeSelect
-                filterTime={filterPassedTimeForEndDate}
-                dateFormat="MMMM d, yyyy h:mm aa"
-                placeholderText="Selecciona fecha y hora de regreso"
-                className="datetime-picker-input"
-                minDate={dateTimeRange.startDateTime || new Date()}
-                timeCaption="Hora"
-                timeIntervals={15}
-              />
-            </div>
           </div>
         </div>
 
@@ -335,7 +280,7 @@ export const Home: React.FC = () => {
       <div className="picker-actions">
         <button 
           onClick={searchFlights}
-          disabled={loading || !dateTimeRange.startDateTime || !dateTimeRange.endDateTime || !searchFilters.budget || searchFilters.travelers < 1}
+          disabled={loading || !dateTimeRange.startDateTime || !searchFilters.budget || searchFilters.travelers < 1}
           className="btn btn-primary"
         >
           {loading ? (
@@ -351,7 +296,7 @@ export const Home: React.FC = () => {
           )}
         </button>
 
-        {(hasSearched || dateTimeRange.startDateTime || dateTimeRange.endDateTime) && (
+        {(hasSearched || dateTimeRange.startDateTime) && (
           <button onClick={clearSearch} className="btn btn-secondary">
             <i className="fas fa-times"></i>
             Limpiar búsqueda
@@ -377,12 +322,11 @@ export const Home: React.FC = () => {
               }
             </h3>
             <div className="search-criteria">
-              {dateTimeRange.startDateTime && dateTimeRange.endDateTime && (
+              {dateTimeRange.startDateTime && (
                 <div className="criterion">
                   <i className="fas fa-calendar-check"></i>
                   <span>
-                    Del {formatDateTime(dateTimeRange.startDateTime)} 
-                    {' '}al {formatDateTime(dateTimeRange.endDateTime)}
+                    El {formatDateTime(dateTimeRange.startDateTime)}
                   </span>
                 </div>
               )}
@@ -401,11 +345,10 @@ export const Home: React.FC = () => {
             <div className="no-flights">
               <i className="fas fa-plane-slash"></i>
               <h4>No hay vuelos disponibles</h4>
-              <p>No se encontraron vuelos en el rango de fechas y horarios seleccionados.</p>
+              <p>No se encontraron vuelos para el día seleccionado.</p>
               <div className="suggestions">
                 <p><strong>Sugerencias:</strong></p>
                 <ul>
-                  <li>Amplía el rango de horarios</li>
                   <li>Considera fechas diferentes</li>
                   <li>Aumenta el presupuesto</li>
                   <li>Reduce el número de viajeros</li>
