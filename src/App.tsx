@@ -10,6 +10,7 @@ import { Destinos } from './pages/Destinos/Destinos.tsx';
 import { DetalleDestino } from './pages/DetalleDestino/DetalleDestino.tsx';
 import { FavoritesProvider } from './context/FavoriteContext.tsx';
 import { Favoritos } from './pages/Favoritos/Favoritos.tsx';
+import { MisViajes } from './pages/MisViajes/Historial.tsx';
 
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/destinos" element={<Destinos />} />
           <Route path="/destinos/:id" element={<DetalleDestino />} />
           <Route path="/favoritos" element={<Favoritos />} />
+          <Route path="/mis-viajes" element={<MisViajes />} />
           {/* Otras rutas irán aquí */}
         </Routes>
         
