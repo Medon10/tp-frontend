@@ -29,7 +29,7 @@ interface Vuelo {
 export const Favoritos: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
-  const { favorites, removeFavorite, loading: favoritesLoading } = useFavorites();
+  const {removeFavorite, loading: favoritesLoading } = useFavorites();
   
   const [vuelos, setVuelos] = useState<Vuelo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +49,7 @@ export const Favoritos: React.FC = () => {
 
     try {
       // Obtenemos los favoritos con toda la información desde el endpoint
-      const response = await axios.get('/api/favorites');
+      const response = await axios.get('/api/favorites', { withCredentials: true });
       const data = response.data as { data: { flight: Vuelo }[] };
       
       // Extraemos los vuelos completos

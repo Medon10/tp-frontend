@@ -1,16 +1,22 @@
+// Asegúrate de que todas estas importaciones existan al principio de tu archivo
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.tsx';
+import { FavoritesProvider } from './context/FavoriteContext.tsx';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 import { Home } from './pages/Home/Home.tsx';
 import { Login } from './pages/Login/Login.tsx';
-import { Perfil } from './pages/Perfil/Perfil.tsx';
 import { Register } from './pages/Register/Register.tsx';
 import { Destinos } from './pages/Destinos/Destinos.tsx';
 import { DetalleDestino } from './pages/DetalleDestino/DetalleDestino.tsx';
-import { FavoritesProvider } from './context/FavoriteContext.tsx';
-import { Favoritos } from './pages/Favoritos/Favoritos.tsx';
+import { ProtectedRoute } from './routes/ProtectedRoute.tsx';
+
+// --- Componentes de Rutas Protegidas ---
+import { Perfil } from './pages/Perfil/Perfil.tsx';
+import { Favoritos } from './pages/Favoritos/Favoritos.tsx'; // <-- ESTA LÍNEA ES CRUCIAL
 import { MisViajes } from './pages/MisViajes/Historial.tsx';
+import { AdminVuelos } from './pages/Admin/AdminVuelos.tsx';
 
 
 export default function App() {
@@ -24,15 +30,19 @@ export default function App() {
         <Header />
         
         <Routes>
+          {/* Rutas Públicas */}
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/perfil" element={<Perfil />} />
           <Route path="/register" element={<Register />} />
           <Route path="/destinos" element={<Destinos />} />
           <Route path="/destinos/:id" element={<DetalleDestino />} />
-          <Route path="/favoritos" element={<Favoritos />} />
-          <Route path="/mis-viajes" element={<MisViajes />} />
-          {/* Otras rutas irán aquí */}
+
+          {/* Rutas Protegidas (requieren iniciar sesión) */}
+          <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
+          <Route path="/mis-viajes" element={<ProtectedRoute><MisViajes /></ProtectedRoute>} />
+          <Route path="/favoritos" element={<ProtectedRoute><Favoritos /></ProtectedRoute>} />
+          <Route path="/admin/flights" element={<ProtectedRoute><AdminVuelos /></ProtectedRoute>} />
+          
         </Routes>
         
         <Footer />
