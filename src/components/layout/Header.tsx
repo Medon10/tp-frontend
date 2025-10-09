@@ -146,19 +146,6 @@ export const Header: React.FC = () => {
                                                     <i className="fas fa-heart"></i>
                                                     Favoritos
                                                 </a>
-                                                {user?.rol === 'admin' && (
-                                                <a 
-                                                    href="#" 
-                                                    className="dropdown-item admin-link" // Puedes darle una clase para estilos
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        handleDropdownItemClick(() => navigate('/admin/flights'));
-                                                    }}
-                                                >
-                                                    <i className="fas fa-user-shield"></i>
-                                                    Administración
-                                                </a>
-                                            )}
                                                 <div className="dropdown-divider"></div>
                                                 <a 
                                                     href="#" 

@@ -28,7 +28,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const fetchFavorites = async () => {
     try {
-      const response = await axios.get('/api/favorites', { withCredentials: true });
+      const response = await axios.get('/api/favorites');
       const data = response.data as { data: { flight: { id: number } }[] };
       const favoriteIds = data.data.map((fav: any) => fav.flight.id);
       setFavorites(favoriteIds);
@@ -41,7 +41,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const addFavorite = async (flightId: number) => {
     try {
-      await axios.post('/api/favorites', { flight_id: flightId }, { withCredentials: true });
+      await axios.post('/api/favorites', { flight_id: flightId });
       setFavorites(prev => [...prev, flightId]);
     } catch (error: any) {
       if (error.response?.status === 409) {
@@ -54,7 +54,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const removeFavorite = async (flightId: number) => {
     try {
-      await axios.delete(`/api/favorites/${flightId}`, { withCredentials: true });
+      await axios.delete(`/api/favorites/${flightId}`);
       setFavorites(prev => prev.filter(id => id !== flightId));
     } catch (error) {
       console.error('Error al eliminar favorito:', error);
