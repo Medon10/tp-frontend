@@ -1,5 +1,3 @@
-// Asegúrate de que todas estas importaciones existan al principio de tu archivo
-
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext.tsx';
 import { FavoritesProvider } from './context/FavoriteContext.tsx';
@@ -14,7 +12,7 @@ import { ProtectedRoute } from './routes/ProtectedRoute.tsx';
 
 // --- Componentes de Rutas Protegidas ---
 import { Perfil } from './pages/Perfil/Perfil.tsx';
-import { Favoritos } from './pages/Favoritos/Favoritos.tsx'; // <-- ESTA LÍNEA ES CRUCIAL
+import { Favoritos } from './pages/Favoritos/Favoritos.tsx'; 
 import { MisViajes } from './pages/MisViajes/Historial.tsx';
 import { AdminVuelos } from './pages/Admin/AdminVuelos.tsx';
 
@@ -39,7 +37,7 @@ export default function App() {
 
           {/* Rutas Protegidas (requieren iniciar sesión) */}
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
-          <Route path="/mis-viajes" element={<ProtectedRoute><MisViajes /></ProtectedRoute>} />
+          <Route path="/historial" element={<ProtectedRoute><MisViajes /></ProtectedRoute>} />
           <Route path="/favoritos" element={<ProtectedRoute><Favoritos /></ProtectedRoute>} />
           <Route path="/admin/flights" element={<ProtectedRoute><AdminVuelos /></ProtectedRoute>} />
           
