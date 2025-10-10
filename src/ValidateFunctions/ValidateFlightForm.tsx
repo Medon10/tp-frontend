@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import type { Vuelo } from "./types"
-import type { Destino } from "./types"
+import type { Vuelo } from "../pages/Admin/types"
+import type { Destino } from "../pages/Admin/types"
 
 interface FlightFormProps {
   vueloAEditar: Vuelo | null;

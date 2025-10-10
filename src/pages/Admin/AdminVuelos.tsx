@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Admin.css';
-import { FlightForm } from './FlightForm'; // Importa el nuevo formulario
+import { FlightForm } from '../../ValidateFunctions/ValidateFlightForm'; // Importa el nuevo formulario
 import type { Vuelo } from './types'; // Importa los tipos
 
 export const AdminVuelos: React.FC = () => {
