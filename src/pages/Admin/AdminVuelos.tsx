@@ -1,15 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Admin.css';
-import { FlightForm } from './FlightForm'; // Importa el nuevo formulario
-import type { Vuelo } from './types'; // Importa los tipos
+import { FlightForm } from './FlightForm';
+import type { Vuelo } from './types';
 
 export const AdminVuelos: React.FC = () => {
   const [vuelos, setVuelos] = useState<Vuelo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Estados para manejar el modal
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [vueloSeleccionado, setVueloSeleccionado] = useState<Vuelo | null>(null);
 
@@ -21,7 +19,8 @@ export const AdminVuelos: React.FC = () => {
     setIsLoading(true);
     try {
       const response = await axios.get('/api/flights', { withCredentials: true });
-      setVuelos((response.data as { data: Vuelo[] }).data || []);
+      const data = response.data as { data: Vuelo[] };
+      setVuelos(data.data || []);
     } catch (err) {
       setError('No se pudieron cargar los vuelos.');
     } finally {
@@ -29,7 +28,6 @@ export const AdminVuelos: React.FC = () => {
     }
   };
 
-  // Funciones para manejar el modal
   const handleOpenFormParaCrear = () => {
     setVueloSeleccionado(null);
     setIsFormOpen(true);
@@ -40,20 +38,16 @@ export const AdminVuelos: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  const handleCerrarForm = () => {
-    setIsFormOpen(false);
-  };
-
   const handleFormSubmit = () => {
-    handleCerrarForm();
-    fetchVuelos(); // Refresca la lista de vuelos después de guardar
+    setIsFormOpen(false);
+    fetchVuelos();
   };
 
   const handleDelete = async (id: number) => {
     if (window.confirm('¿Seguro que quieres eliminar este vuelo?')) {
       try {
         await axios.delete(`/api/flights/${id}`, { withCredentials: true });
-        fetchVuelos(); // Refresca la lista
+        fetchVuelos();
       } catch (error) {
         alert('Error al eliminar el vuelo.');
       }
@@ -76,9 +70,10 @@ export const AdminVuelos: React.FC = () => {
             <tr>
               <th>ID</th>
               <th>Aerolínea</th>
-              <th>Origen/Destino</th>
+              <th>Ruta</th>
               <th>Salida</th>
-              <th>Precio</th>
+              <th>Asientos</th>
+              <th>Precio Base (USD)</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -89,7 +84,8 @@ export const AdminVuelos: React.FC = () => {
                 <td>{vuelo.aerolinea}</td>
                 <td>{vuelo.origen} → {vuelo.destino?.nombre || 'N/A'}</td>
                 <td>{new Date(vuelo.fechahora_salida).toLocaleString('es-AR')}</td>
-                <td>${vuelo.montoVuelo}</td>
+                <td>{(vuelo as any).capacidad_restante} / {vuelo.cantidad_asientos}</td>
+                <td>${vuelo.montoVuelo.toLocaleString()}</td>
                 <td className="actions">
                   <button className="btn btn-outline" onClick={() => handleOpenFormParaEditar(vuelo)}>Editar</button>
                   <button className="btn btn-danger" onClick={() => handleDelete(vuelo.id)}>Eliminar</button>
@@ -100,12 +96,11 @@ export const AdminVuelos: React.FC = () => {
         </table>
       </div>
 
-      {/* El Modal del Formulario */}
       {isFormOpen && (
         <FlightForm
           vueloAEditar={vueloSeleccionado}
           onFormSubmit={handleFormSubmit}
-          onCancel={handleCerrarForm}
+          onCancel={() => setIsFormOpen(false)}
         />
       )}
     </main>
