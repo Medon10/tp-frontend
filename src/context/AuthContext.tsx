@@ -38,25 +38,29 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
     }
   };
 
-  const checkAuth = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('/api/users/profile/me', { 
-        withCredentials: true,
-        timeout: 5000
-      });
-      
-      const data = response.data as { data: User };
-      if (response.status === 200 && data.data) {
-        setUser(data.data);
-      }
-    } catch (error) {
-      console.error('Error verificando autenticación:', error);
-      setUser(null);
-    } finally {
-      setLoading(false);
+const checkAuth = async () => {
+  try {
+    setLoading(true);
+    const response = await axios.get<{ data: User }>('/api/users/profile/me', { 
+      withCredentials: true,
+      timeout: 5000
+    });
+    
+    if (response.status === 200 && response.data?.data) {
+      setUser(response.data.data);
     }
-  };
+  } catch (error: any) {
+    // Silenciar error 401 (no autenticado es normal)
+    if (error.response?.status === 401) {
+      console.log('Usuario no autenticado (normal)');
+    } else {
+      console.error('Error verificando autenticación:', error);
+    }
+    setUser(null);
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Verificar autenticación al cargar
   useEffect(() => {

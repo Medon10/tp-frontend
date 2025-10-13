@@ -124,7 +124,7 @@ body {
 
 /* Results section */
 .results {
-  display: none;
+  display: block;
   margin-top: 3rem;
 }
 
