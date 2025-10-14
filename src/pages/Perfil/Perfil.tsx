@@ -205,15 +205,15 @@ export const Perfil: React.FC = () => {
 
               <button 
                 className="action-btn-beautiful history"
-                onClick={() => navigate('/historial')}
+                onClick={() => navigate('/mis-viajes')}
               >
                 <div className="action-bg"></div>
                 <div className="action-icon">
-                  <i className="fas fa-history"></i>
+                  <i className="fas fa-suitcase-rolling"></i> 
                 </div>
                 <div className="action-content">
-                  <h4>Historial</h4>
-                  <p>Viajes anteriores</p>
+                  <h4>Mis Viajes</h4>
+                  <p>Próximos y pasados</p>
                 </div>
               </button>
             </section>

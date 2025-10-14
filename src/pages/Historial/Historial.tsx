@@ -27,7 +27,7 @@ interface Reserva {
 
 type TabType = 'proximos' | 'pasados' | 'cancelados';
 
-export const MisViajes: React.FC = () => {
+export const Historial: React.FC = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
