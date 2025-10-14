@@ -1,21 +1,26 @@
-/* Estilos para Dashboard/Perfil optimizado - Agregar al index.css */
+/* ===============================================
+   PERFIL.CSS - MOBILE FIRST APPROACH
+   =============================================== */
 
-/* Header principal compacto */
+/* ===============================================
+   BASE STYLES - MOBILE FIRST (SM: 0-767px)
+   =============================================== */
+
+/* Header principal - Móvil */
 .profile-main-header {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
-  padding: 2rem;
-  border-radius: 16px;
-  margin-top: 1.5rem;
+  padding: 1.5rem; /* Móvil: padding reducido */
+  border-radius: 12px;
+  margin-top: 1rem;
   margin-bottom: 1.5rem;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 2rem;
-  align-items: center;
+  display: flex;
+  flex-direction: column; /* Móvil: apilado */
+  gap: 1.5rem;
 }
 
 .profile-welcome h1 {
-  font-size: 2.2rem;
+  font-size: 1.6rem; /* Móvil: título pequeño */
   margin-bottom: 0.5rem;
   background: linear-gradient(45deg, rgba(255,255,255,0.9), rgba(255,255,255,1));
   -webkit-background-clip: text;
@@ -24,7 +29,7 @@
 }
 
 .profile-welcome p {
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   opacity: 0.9;
   margin: 0;
 }
@@ -34,30 +39,41 @@
   align-items: center;
   gap: 1rem;
   background: rgba(255, 255, 255, 0.15);
-  padding: 1.5rem;
+  padding: 1.2rem;
   border-radius: 12px;
   backdrop-filter: blur(10px);
-  min-width: 280px;
 }
 
 .profile-avatar {
-  font-size: 3rem;
+  font-size: 2.5rem; /* Móvil: avatar más pequeño */
   color: rgba(255, 255, 255, 0.9);
 }
 
 .profile-info h2 {
   margin-bottom: 0.3rem;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
+}
+
+.profile-info p {
+  font-size: 0.85rem;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.user-level {
+  margin-top: 0.3rem;
+  font-size: 0.85rem;
 }
 
 .user-level i {
   color: #ffd700;
+  margin-right: 0.3rem;
 }
 
-/* Estadísticas compactas */
+/* Estadísticas - Móvil: 1 columna */
 .profile-stats-compact {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr; /* Móvil: 1 columna */
   gap: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -66,7 +82,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.2rem;
+  padding: 1rem;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
@@ -78,37 +94,41 @@
 }
 
 .stat-item i {
-  font-size: 1.8rem;
+  font-size: 1.5rem; /* Móvil: iconos más pequeños */
   color: var(--primary);
 }
 
+.stat-content {
+  flex: 1;
+}
+
 .stat-item h3 {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   color: var(--dark);
   margin-bottom: 0.2rem;
+  font-weight: 700;
 }
 
 .stat-item p {
   color: #666;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   margin: 0;
 }
 
-/* Grid de contenido principal */
+/* Grid de contenido - Móvil: 1 columna */
 .profile-content-grid {
-    
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
-  gap: 2rem;
+  grid-template-columns: 1fr; /* Móvil: 1 columna */
+  gap: 1.5rem;
   align-items: start;
 }
 
-.budget-form {
-    width: 2000px;
-    background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+/* Formulario de perfil */
+.profile-form {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .profile-form h3 {
@@ -117,16 +137,18 @@
   gap: 0.5rem;
   color: var(--dark);
   margin-bottom: 1.5rem;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
 }
 
 .profile-form h3 i {
   color: var(--primary);
+  font-size: 1.2rem;
 }
 
 .profile-form input[readonly] {
   background-color: #f8f9fa;
   cursor: not-allowed;
+  opacity: 0.7;
 }
 
 /* Columna derecha */
@@ -136,16 +158,31 @@
   gap: 1.5rem;
 }
 
-/* Próximo viaje compacto */
+/* Próximo viaje */
+.compact-trip {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
 .compact-trip h3 {
-  font-size: 1.1rem;
+  font-size: 1rem;
   margin-bottom: 1rem;
+  color: var(--dark);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.compact-trip h3 i {
+  color: var(--primary);
 }
 
 .next-trip {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column; /* Móvil: apilado */
+  gap: 1rem;
   padding: 1rem;
   background: linear-gradient(135deg, rgba(58, 134, 255, 0.1), rgba(131, 56, 236, 0.1));
   border-radius: 8px;
@@ -154,20 +191,25 @@
 
 .trip-info h4 {
   color: var(--dark);
-  margin-bottom: 0.3rem;
-  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
 }
 
 .trip-info p {
   color: #666;
-  margin: 0;
+  margin: 0.2rem 0;
   display: flex;
   align-items: center;
   gap: 0.3rem;
+  font-size: 0.8rem;
+}
+
+.trip-info p i {
+  color: var(--primary);
   font-size: 0.85rem;
 }
 
-/* Botones de acción hermosos */
+/* Botones de acción */
 .profile-actions-compact {
   display: flex;
   flex-direction: column;
@@ -176,9 +218,9 @@
 
 .action-btn-beautiful {
   position: relative;
-  padding: 1.5rem;
+  padding: 1.2rem; /* Móvil: padding reducido */
   border: none;
-  border-radius: 16px;
+  border-radius: 12px;
   cursor: pointer;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -217,17 +259,18 @@
 }
 
 .action-icon {
-  width: 50px;
-  height: 50px;
+  width: 45px; /* Móvil: iconos más pequeños */
+  height: 45px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   color: white;
   position: relative;
   z-index: 1;
   transition: transform 0.3s;
+  flex-shrink: 0;
 }
 
 .action-btn-beautiful:hover .action-icon {
@@ -252,13 +295,13 @@
 .action-content h4 {
   color: var(--dark);
   margin-bottom: 0.2rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
   transition: color 0.3s;
 }
 
 .action-content p {
   color: #666;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   margin: 0;
   transition: color 0.3s;
 }
@@ -267,7 +310,7 @@
   color: var(--primary);
 }
 
-/* Logout compacto */
+/* Logout */
 .logout-section-compact {
   margin-top: 1rem;
 }
@@ -278,47 +321,175 @@
   transition: all 0.3s;
   width: 100%;
   font-size: 0.9rem;
+  padding: 0.8rem;
+  border-radius: 8px;
+  background: transparent;
+  border: 2px solid #dc3545;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .btn-logout:hover {
   background: #dc3545;
   color: white;
   transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
 
 .btn-logout i {
-  margin-right: 0.5rem;
+  font-size: 1rem;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
+/* ===============================================
+   TABLET - MD (768px - 1023px)
+   =============================================== */
+
+@media (min-width: 768px) {
+  .profile-main-header {
+    padding: 2rem;
+    flex-direction: row; /* Tablet: horizontal */
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .profile-welcome h1 {
+    font-size: 2rem;
+  }
+
+  .profile-welcome p {
+    font-size: 1rem;
+  }
+
+  .profile-avatar {
+    font-size: 2.8rem;
+  }
+
+  .profile-info h2 {
+    font-size: 1.3rem;
+  }
+
+  .profile-user-card {
+    padding: 1.5rem;
+    min-width: 280px;
+  }
+
+  /* Estadísticas: 3 columnas en tablet */
+  .profile-stats-compact {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+  }
+
+  .stat-item {
+    padding: 1.2rem;
+  }
+
+  .stat-item i {
+    font-size: 1.7rem;
+  }
+
+  .stat-item h3 {
+    font-size: 1.5rem;
+  }
+
+  .stat-item p {
+    font-size: 0.85rem;
+  }
+
+  /* Grid de contenido sigue en 1 columna en tablet */
   .profile-content-grid {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
   }
-  
-  .profile-right-column {
-    order: -1;
+
+  .profile-form {
+    padding: 2rem;
+  }
+
+  .profile-form h3 {
+    font-size: 1.2rem;
+  }
+
+  .compact-trip h3 {
+    font-size: 1.1rem;
+  }
+
+  .next-trip {
+    flex-direction: row; /* Tablet: horizontal */
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .action-btn-beautiful {
+    padding: 1.5rem;
+  }
+
+  .action-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 1.3rem;
+  }
+
+  .action-content h4 {
+    font-size: 1.1rem;
+  }
+
+  .action-content p {
+    font-size: 0.85rem;
   }
 }
 
-@media (max-width: 768px) {
-.profile-main-header {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
-    text-align: center;
+/* ===============================================
+   DESKTOP - LG (1024px+)
+   =============================================== */
+
+@media (min-width: 1024px) {
+  .profile-main-header {
+    padding: 2rem;
   }
-  
-  .profile-user-card {
-    justify-content: center;
-    min-width: auto;
-  }
-  
-  .profile-stats-compact {
-    grid-template-columns: 1fr;
-  }
-  
+
   .profile-welcome h1 {
+    font-size: 2.2rem;
+  }
+
+  .profile-welcome p {
+    font-size: 1.1rem;
+  }
+
+  .profile-avatar {
+    font-size: 3rem;
+  }
+
+  /* Grid de contenido: 2 columnas en desktop */
+  .profile-content-grid {
+    grid-template-columns: 1.2fr 0.8fr; /* Desktop: 2 columnas */
+    gap: 2rem;
+  }
+
+  .profile-form {
+    padding: 2rem;
+  }
+
+  .stat-item i {
     font-size: 1.8rem;
+  }
+
+  .stat-item h3 {
+    font-size: 1.6rem;
+  }
+}
+
+/* ===============================================
+   EXTRA LARGE - XL (1440px+)
+   =============================================== */
+
+@media (min-width: 1440px) {
+  .profile-main-header {
+    padding: 2.5rem;
+  }
+
+  .profile-content-grid {
+    gap: 2.5rem;
   }
 }

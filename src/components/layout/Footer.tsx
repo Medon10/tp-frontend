@@ -1,5 +1,6 @@
 // src/components/layout/Footer.tsx
 import React from 'react';
+import './Footer.css';
 
 export const Footer: React.FC = () => {
 return (
@@ -17,10 +18,10 @@ return (
             <h3>Enlaces Rápidos</h3>
             <ul>
             <li>
-            <a href="#">Destinos Populares</a>
+            <a href="./destinos">Destinos Populares</a>
             </li>
             <li>
-                <a href="#">Ofertas Especiales</a>
+            <a href="./Home">Buscar por presupuesto</a>
             </li>
             </ul>
         </div>

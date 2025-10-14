@@ -1,3 +1,7 @@
+/* ===============================================
+   HOME.CSS - MOBILE FIRST APPROACH
+   =============================================== */
+
 :root {
   --primary: #3a86ff;
   --secondary: #8338ec;
@@ -6,7 +10,15 @@
   --dark: #14213d;
   --gray: #e5e5e5;
   --success: #06d6a0;
+  
+  /* Breakpoints */
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 1024px;
 }
+
+/* ===============================================
+   BASE STYLES - MOBILE FIRST (SM: 0-767px)
+   =============================================== */
 
 * {
   margin: 0;
@@ -21,24 +33,23 @@ body {
   min-height: 100vh;
 }
 
-/* Container global para todas las páginas */
+/* Container - Móvil primero */
 .container {
-  max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 1rem; /* Móvil: padding pequeño */
 }
 
-/* Hero section específica del home */
+/* Hero Section - Móvil */
 .hero {
   text-align: center;
-  padding: 3rem 1rem;
-  max-width: 800px;
+  padding: 2rem 1rem; /* Móvil: menos padding */
   margin: 0 auto;
 }
 
 .hero h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  font-size: 1.8rem; /* Móvil: título pequeño */
+  margin-bottom: 0.8rem;
   background: linear-gradient(to right, var(--primary), var(--accent));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -46,23 +57,23 @@ body {
 }
 
 .hero p {
-  font-size: 1.2rem;
+  font-size: 1rem; /* Móvil: texto normal */
   color: #555;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.5;
 }
 
-/* Budget form */
+/* Budget Form - Móvil */
 .budget-form {
   background: white;
   border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-  max-width: 500px;
-  margin: 0 auto 3rem;
+  padding: 1.5rem; /* Móvil: padding reducido */
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  margin: 0 auto 2rem;
 }
 
 .form-group {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .form-group label {
@@ -70,12 +81,13 @@ body {
   margin-bottom: 0.5rem;
   font-weight: 500;
   color: var(--dark);
+  font-size: 0.95rem;
 }
 
 .form-group input, 
 .form-group select {
   width: 100%;
-  padding: 0.8rem;
+  padding: 0.75rem; /* Móvil: padding moderado */
   border: 1px solid #ddd;
   border-radius: 6px;
   font-size: 1rem;
@@ -86,21 +98,23 @@ body {
 .form-group select:focus {
   outline: none;
   border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.1);
 }
 
-/* Botones globales */
+/* Botones - Móvil */
 .btn {
   display: inline-block;
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
   border: none;
-  padding: 0.8rem 1.5rem;
-  font-size: 1rem;
+  padding: 0.75rem 1.2rem; /* Móvil: padding ajustado */
+  font-size: 0.95rem;
   font-weight: 500;
   border-radius: 6px;
   cursor: pointer;
   transition: transform 0.3s, box-shadow 0.3s;
   text-decoration: none;
+  text-align: center;
 }
 
 .btn:hover {
@@ -114,7 +128,7 @@ body {
 
 .btn-outline {
   background: transparent;
-  border: 1px solid var(--primary);
+  border: 2px solid var(--primary);
   color: var(--primary);
 }
 
@@ -122,24 +136,24 @@ body {
   background: rgba(58, 134, 255, 0.1);
 }
 
-/* Results section */
+/* Results Section - Móvil */
 .results {
   display: block;
-  margin-top: 3rem;
+  margin-top: 2rem;
 }
 
 .results h2 {
   text-align: center;
-  margin-bottom: 2rem;
-  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem; /* Móvil: título más pequeño */
   color: var(--dark);
 }
 
-/* Package cards */
+/* Package Cards - Grid 1 columna en móvil */
 .packages {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 2rem;
+  grid-template-columns: 1fr; /* Móvil: 1 columna */
+  gap: 1.5rem;
 }
 
 .package-card {
@@ -156,61 +170,63 @@ body {
 }
 
 .package-image {
-  height: 200px;
+  height: 180px; /* Móvil: altura reducida */
   background-size: cover;
   background-position: center;
 }
 
 .package-content {
-  padding: 1.5rem;
+  padding: 1.2rem;
 }
 
 .package-title {
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   margin-bottom: 0.5rem;
   color: var(--dark);
 }
 
 .package-price {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 700;
   color: var(--primary);
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 .package-details {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .package-detail {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 0.8rem;
-  font-size: 0.95rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.9rem;
 }
 
 .package-detail i {
   color: var(--primary);
   margin-right: 0.5rem;
-  min-width: 20px;
+  min-width: 18px;
+  margin-top: 2px;
 }
 
 .package-actions {
   display: flex;
-  gap: 1rem;
+  flex-direction: column; /* Móvil: botones apilados */
+  gap: 0.8rem;
 }
 
-/* Loading */
+/* Loading - Móvil */
 .loading {
   display: none;
   text-align: center;
-  padding: 2rem;
+  padding: 2rem 1rem;
 }
 
 .loading-spinner {
-  width: 50px;
-  height: 50px;
-  border: 5px solid var(--gray);
+  width: 40px;
+  height: 40px;
+  border: 4px solid var(--gray);
   border-top-color: var(--primary);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -221,12 +237,12 @@ body {
   to { transform: rotate(360deg); }
 }
 
-/* Features section */
+/* Features - Grid 1 columna en móvil */
 .features {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-  margin: 4rem 0;
+  grid-template-columns: 1fr; /* Móvil: 1 columna */
+  gap: 1.5rem;
+  margin: 3rem 0 2rem;
 }
 
 .feature {
@@ -235,110 +251,218 @@ body {
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 2rem;
+  padding: 1.5rem;
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  min-height: 200px; /* altura mínima para que se vea bien */
+  min-height: 160px;
 }
 
 .feature i {
-  font-size: 2.5rem;
+  font-size: 2rem;
   color: var(--primary);
-  margin-bottom: 1rem;
-}
-
-.feature h3 {
-  font-size: 1.3rem;
-  margin: 0;
-}
-
-
-/* Footer */
-footer {
-  background: var(--dark);
-  color: white;
-  padding: 3rem 0;
-  margin-top: 4rem;
-}
-
-.footer-content {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-}
-
-.footer-section h3 {
-  margin-bottom: 1.5rem;
-  font-size: 1.2rem;
-}
-
-.footer-section ul {
-  list-style: none;
-}
-
-.footer-section ul li {
   margin-bottom: 0.8rem;
 }
 
-.footer-section ul li a {
-  color: #ddd;
-  text-decoration: none;
-  transition: color 0.3s;
+.feature h3 {
+  font-size: 1.1rem;
+  margin: 0;
 }
 
-.footer-section ul li a:hover {
-  color: var(--primary);
-}
-
-.copyright {
-  text-align: center;
-  margin-top: 2rem;
-  padding-top: 2rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  color: #aaa;
+/* Error Message - Móvil */
+.error-message {
+  background: #ffe6e6;
+  border: 1px solid #ff4444;
+  color: #cc0000;
+  padding: 0.75rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
   font-size: 0.9rem;
 }
 
-/* Banner */
-.banner {
-  display: none;
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: var(--success);
-  color: white;
-  padding: 1rem;
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  animation: slideIn 0.3s ease-out;
-  z-index: 1000;
+.error-message i {
+  margin-right: 0.5rem;
+  color: #ff4444;
 }
 
-@keyframes slideIn {
-  from { transform: translateY(100px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
+/* ===============================================
+   TABLET - MD (768px - 1023px)
+   =============================================== */
 
-/* Responsive */
-@media (max-width: 768px) {
+@media (min-width: 768px) {
   .container {
-    padding: 0 1rem;
+    padding: 0 2rem; /* Tablet: más padding */
   }
-  
+
+  .hero {
+    padding: 2.5rem 1.5rem;
+    max-width: 700px;
+  }
+
   .hero h1 {
-    font-size: 2rem;
+    font-size: 2.2rem; /* Tablet: título mediano */
   }
-  
+
   .hero p {
-    font-size: 1rem;
+    font-size: 1.1rem;
   }
-  
+
   .budget-form {
+    padding: 2rem;
+    max-width: 600px; /* Tablet: ancho limitado */
+  }
+
+  /* Grid 2 columnas en tablet */
+  .packages {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+
+  .package-image {
+    height: 200px; /* Tablet: altura normal */
+  }
+
+  .package-content {
     padding: 1.5rem;
   }
-  
-  .footer-content {
-    grid-template-columns: 1fr;
+
+  .package-title {
+    font-size: 1.3rem;
+  }
+
+  .package-price {
+    font-size: 1.4rem;
+  }
+
+  .package-actions {
+    flex-direction: row; /* Tablet: botones horizontales */
+    gap: 1rem;
+  }
+
+  /* Features 2 columnas en tablet */
+  .features {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+    margin: 3.5rem 0;
+  }
+
+  .feature {
+    padding: 2rem;
+    min-height: 180px;
+  }
+
+  .feature i {
+    font-size: 2.3rem;
+  }
+
+  .feature h3 {
+    font-size: 1.2rem;
+  }
+
+  .results h2 {
+    font-size: 1.7rem;
+  }
+}
+
+/* ===============================================
+   DESKTOP - LG (1024px+)
+   =============================================== */
+
+@media (min-width: 1024px) {
+  .container {
+    max-width: 1200px; /* Desktop: ancho máximo */
+    padding: 0 2rem;
+  }
+
+  .hero {
+    padding: 3rem 1rem;
+    max-width: 800px;
+  }
+
+  .hero h1 {
+    font-size: 2.5rem; /* Desktop: título grande */
+  }
+
+  .hero p {
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+  }
+
+  .budget-form {
+    padding: 2rem;
+    max-width: 500px; /* Desktop: ancho óptimo */
+    margin: 0 auto 3rem;
+  }
+
+  /* Grid 3 columnas en desktop */
+  .packages {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .package-image {
+    height: 200px;
+  }
+
+  .package-title {
+    font-size: 1.4rem;
+  }
+
+  .package-price {
+    font-size: 1.5rem;
+  }
+
+  .package-detail {
+    font-size: 0.95rem;
+  }
+
+  /* Features 3 columnas en desktop */
+  .features {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    margin: 4rem 0;
+  }
+
+  .feature {
+    min-height: 200px;
+  }
+
+  .feature i {
+    font-size: 2.5rem;
+  }
+
+  .feature h3 {
+    font-size: 1.3rem;
+  }
+
+  .results {
+    margin-top: 3rem;
+  }
+
+  .results h2 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+
+  .loading-spinner {
+    width: 50px;
+    height: 50px;
+    border-width: 5px;
+  }
+}
+
+/* ===============================================
+   EXTRA LARGE - XL (1440px+) - OPCIONAL
+   =============================================== */
+
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1400px;
+  }
+
+  .packages {
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
   }
 }

@@ -67,7 +67,6 @@ export const Header: React.FC = () => {
                     <div className="nav-links">
                         <a href="#" onClick={handleNavigation('/')}>Inicio</a>
                         <a href="#" onClick={handleNavigation('/destinos')}>Destinos</a>
-                        <a href="#" onClick={handleNavigation('/ofertas')}>Ofertas</a>
                         
                         {loading ? (
                             <span className="loading-text">

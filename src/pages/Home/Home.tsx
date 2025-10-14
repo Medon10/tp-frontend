@@ -94,14 +94,14 @@ export const Home: React.FC = () => {
         { withCredentials: true }
       );
 
-      console.log('✅ Respuesta recibida:', response.data); 
-      console.log('📊 Cantidad de resultados:', response.data.data?.length);
+      console.log(' Respuesta recibida:', response.data); 
+      console.log('Cantidad de resultados:', response.data.data?.length);
 
       setResultados(response.data);
-      console.log('🎯 Estado actualizado, resultados:', response.data.data);
+      console.log('Estado actualizado, resultados:', response.data.data);
     } catch (error: any) {
       console.error('Error al buscar vuelos:', error);
-      console.log('🔍 Detalles del error:', error.response?.data);
+      console.log('Detalles del error:', error.response?.data);
       setError(error.response?.data?.message || 'Error al buscar vuelos. Intenta de nuevo.');
       setResultados(null);
     } finally {

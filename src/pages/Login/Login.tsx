@@ -12,6 +12,7 @@ type UserData = {
   id: number;
   nombre: string;
   apellido: string;
+  rol: 'cliente' | 'admin';
 };
 
 type ValidationErrors = {
@@ -35,9 +36,6 @@ export const Login: React.FC = () => {
   const location = useLocation();
 
   const from = location.state?.from?.pathname || '/perfil';
-  
-  // Variables de configuración
-  const isDevelopment = window.location.hostname === 'localhost';
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -171,33 +169,15 @@ export const Login: React.FC = () => {
           default:
             setErrors({ general: serverMessage || 'Error de autenticación.' });
         }
+
       } else if (error.request) {
         console.log('No hay respuesta del servidor');
         console.log('Request config:', error.config);
-        
-        // Fallback solo en desarrollo
-        if (isDevelopment) {
-          console.log('Modo desarrollo: usando credenciales demo');
-          
-          if (formData.email === 'admin@test.com' && formData.password === '123456') {
-            const mockUser: UserData = {
-              email: formData.email,
-              password: formData.password,
-              id: 15,
-              nombre: 'Usuario',
-              apellido: 'Demo'
-            };
-            login(mockUser);
-          } else {
-            setErrors({ 
-              general: 'Sin conexión al servidor. Verifica que esté corriendo en el puerto 3000' 
-            });
-          }
-        } else {
-          setErrors({ 
-            general: 'Sin conexión al servidor. Verifica tu conexión a internet.' 
-          });
-        }
+
+        // Mensaje único cuando no hay respuesta del servidor (se quitó el fallback de modo desarrollo)
+        setErrors({
+          general: 'Sin conexión al servidor. Verifica que el servidor esté corriendo y tu conexión a internet.'
+        });
       } else {
         setErrors({ general: 'Error inesperado. Intenta de nuevo.' });
       }
@@ -305,17 +285,7 @@ export const Login: React.FC = () => {
                 'Iniciar Sesión'
               )}
             </button>
-            
-            <div className="form-links">
-              <a href="#" className="link">¿Olvidaste tu contraseña?</a>
-            </div>
           </form>
-        </section>
-
-        <section className="auth-options">
-          <div className="auth-divider">
-            <span>o</span>
-          </div>
         </section>
 
         <section className="auth-redirect">
@@ -337,14 +307,6 @@ export const Login: React.FC = () => {
           </div>
         </section>
       </main>
-/*
-      {/* Demo credentials banner - solo en desarrollo */}
-  /*    {isDevelopment && (
-        <div className="demo-credentials">
-          <i className="fas fa-info-circle"></i>
-          <span><strong>Demo:</strong> admin@test.com / 123456</span>
-        </div>
-      )}
     </>
   );
-}; 
+};
