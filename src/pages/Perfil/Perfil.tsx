@@ -192,7 +192,10 @@ export const Perfil: React.FC = () => {
 
             {/* Acciones principales - Solo 2 botones bonitos */}
             <section className="profile-actions-compact">
-              <button className="action-btn-beautiful favorites">
+              <button 
+                className="action-btn-beautiful favorites"
+                onClick={() => navigate('/favoritos')}
+              >
                 <div className="action-bg"></div>
                 <div className="action-icon">
                   <i className="fas fa-heart"></i>

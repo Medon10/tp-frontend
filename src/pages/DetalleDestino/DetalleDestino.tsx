@@ -20,7 +20,9 @@ interface Vuelo {
   duracion: number;
   aerolinea: string;
   cantidad_asientos: number;
+  capacidad_restante: number;
   montoVuelo: number;
+  precio_por_persona: number;
   origen: string;
   destino: Destino;
 }
@@ -121,12 +123,15 @@ export const DetalleDestino: React.FC = () => {
   const aerolineasUnicas = Array.from(new Set(vuelos.map(v => v.aerolinea)));
 
   const vuelosFiltrados = vuelos
-    .filter(vuelo => filtroAerolinea === 'todas' || vuelo.aerolinea === filtroAerolinea)
-    .sort((a, b) => {
-      if (ordenPrecio === 'asc') return a.montoVuelo - b.montoVuelo;
-      if (ordenPrecio === 'desc') return b.montoVuelo - a.montoVuelo;
-      return 0;
-    });
+  .filter(vuelo => filtroAerolinea === 'todas' || vuelo.aerolinea === filtroAerolinea)
+  .sort((a, b) => {
+    const precioA = a.precio_por_persona ?? a.montoVuelo ?? 0;
+    const precioB = b.precio_por_persona ?? b.montoVuelo ?? 0;
+    
+    if (ordenPrecio === 'asc') return precioA - precioB;
+    if (ordenPrecio === 'desc') return precioB - precioA;
+    return 0;
+  });
 
   if (isLoading) {
     return (
@@ -283,21 +288,25 @@ export const DetalleDestino: React.FC = () => {
 
                   <div className="vuelo-info">
                     <div className="info-item">
-                      <i className="fas fa-users"></i>
-                      <span>{vuelo.cantidad_asientos} asientos</span>
-                    </div>
+                    <i className="fas fa-chair"></i>
+                    <span>
+                      {vuelo.capacidad_restante ?? vuelo.cantidad_asientos ?? 0} asientos disponibles
+                    </span>
                   </div>
+                </div>
 
-                  <div className="vuelo-footer">
-                    <div className="precio">
-                      <span className="precio-label">Desde</span>
-                      <span className="precio-valor">${vuelo.montoVuelo.toLocaleString()}</span>
-                      <span className="precio-moneda">USD</span>
-                    </div>
-                    <button className="btn btn-primary">
-                      Reservar
-                    </button>
+                <div className="vuelo-footer">
+                  <div className="precio">
+                    <span className="precio-label">Desde</span>
+                    <span className="precio-valor">
+                      ${(vuelo.precio_por_persona ?? vuelo.montoVuelo ?? 0).toLocaleString('es-AR')}
+                    </span>
+                    <span className="precio-moneda">USD/persona</span>
                   </div>
+                  <button className="btn btn-primary">
+                    Reservar
+                  </button>
+                </div>
                 </article>
               ))}
             </div>
