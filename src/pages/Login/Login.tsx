@@ -174,9 +174,9 @@ export const Login: React.FC = () => {
         console.log('No hay respuesta del servidor');
         console.log('Request config:', error.config);
 
-        // Mensaje único cuando no hay respuesta del servidor (se quitó el fallback de modo desarrollo)
+        // Mensaje único cuando no hay respuesta del servidor o conexión
         setErrors({
-          general: 'Sin conexión al servidor. Verifica que el servidor esté corriendo y tu conexión a internet.'
+          general: 'Sin conexión al servidor. Verifica la conexión a internet y al servidor.'
         });
       } else {
         setErrors({ general: 'Error inesperado. Intenta de nuevo.' });

@@ -42,7 +42,6 @@ export const Register: React.FC = () => {
   const location = useLocation();
 
   const from = location.state?.from?.pathname || '/perfil';
-  const isDevelopment = window.location.hostname === 'localhost';
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -212,15 +211,11 @@ export const Register: React.FC = () => {
           default:
             setErrors({ general: serverMessage || 'Error al crear la cuenta.' });
         }
-      } else if (error.request) {
-        console.log('No hay respuesta del servidor');
-
-      } else if (error.request) {
+        } else if (error.request) {
         console.log('No hay respuesta del servidor');
         console.log('Request config:', error.config);
-
         setErrors({
-          general: 'Sin conexión al servidor. Verifica que el servidor esté corriendo y tu conexión a internet.'
+          general: 'Sin conexión al servidor. Verifica tu conexión a internet.'
         });
       } else {
         setErrors({ general: 'Error inesperado. Intenta de nuevo.' });

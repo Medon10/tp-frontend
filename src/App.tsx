@@ -37,7 +37,7 @@ export default function App() {
 
           {/* Rutas Protegidas (requieren iniciar sesión) */}
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
-          <Route path="/historial" element={<ProtectedRoute><MisViajes /></ProtectedRoute>} />
+          <Route path="/mis-viajes" element={<ProtectedRoute><MisViajes /></ProtectedRoute>} />
           <Route path="/favoritos" element={<ProtectedRoute><Favoritos /></ProtectedRoute>} />
           <Route path="/admin/flights" element={<ProtectedRoute><AdminVuelos /></ProtectedRoute>} />
           
