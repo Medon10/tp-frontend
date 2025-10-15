@@ -268,6 +268,15 @@ export const Login: React.FC = () => {
                   className={errors.password ? 'error' : ''}
                   autoComplete="current-password"
                 />
+                <button
+                  type="button"
+                  className="toggle-password"
+                  onClick={togglePasswordVisibility}
+                  disabled={isLoading}
+                  aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+                >
+                  <i className={`fas fa-eye${showPassword ? '' : '-slash'}`}></i>
+                </button>
               </div>
             </div>
             
