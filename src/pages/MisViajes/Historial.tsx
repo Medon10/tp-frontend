@@ -8,9 +8,7 @@ interface Reserva {
   id: number;
   fecha_reserva: string;
   valor_reserva: number;
-  estado: 'pendiente' | 'confirmado' | 'cancelado' | 'completado';
-  isPast: boolean;
-  canCancel: boolean;
+  estado: 'confirmado' | 'cancelado' | 'completado';
   flight: {
     id: number;
     origen: string;
@@ -69,6 +67,18 @@ export const MisViajes: React.FC = () => {
     }
   };
 
+  // Función para verificar si un vuelo ya pasó
+  const esVueloPasado = (fechaSalida: string): boolean => {
+    const fechaVuelo = new Date(fechaSalida);
+    const hoy = new Date();
+    return fechaVuelo < hoy;
+  };
+
+  // Función para verificar si se puede cancelar
+  const puedeCancelar = (reserva: Reserva): boolean => {
+    return reserva.estado === 'confirmado' && !esVueloPasado(reserva.flight.fechahora_salida);
+  };
+
   const handleCancelReservation = async (reservaId: number) => {
     if (!window.confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
       return;
@@ -85,7 +95,7 @@ export const MisViajes: React.FC = () => {
       setReservas(prev =>
         prev.map(reserva =>
           reserva.id === reservaId
-            ? { ...reserva, estado: 'cancelado', canCancel: false }
+            ? { ...reserva, estado: 'cancelado' }
             : reserva
         )
       );
@@ -118,8 +128,6 @@ export const MisViajes: React.FC = () => {
     switch (estado) {
       case 'confirmado':
         return 'badge-confirmado';
-      case 'pendiente':
-        return 'badge-pendiente';
       case 'cancelado':
         return 'badge-cancelado';
       case 'completado':
@@ -133,8 +141,6 @@ export const MisViajes: React.FC = () => {
     switch (estado) {
       case 'confirmado':
         return 'Confirmado';
-      case 'pendiente':
-        return 'Pendiente';
       case 'cancelado':
         return 'Cancelado';
       case 'completado':
@@ -144,14 +150,24 @@ export const MisViajes: React.FC = () => {
     }
   };
 
+  // Filtrado corregido para evitar duplicados
   const reservasFiltradas = reservas.filter(reserva => {
+    const vueloPasado = esVueloPasado(reserva.flight.fechahora_salida);
+    
     switch (activeTab) {
       case 'proximos':
-        return !reserva.isPast && reserva.estado !== 'cancelado';
+        // Solo confirmados que NO hayan pasado
+        return reserva.estado === 'confirmado' && !vueloPasado;
+      
       case 'pasados':
-        return reserva.isPast || reserva.estado === 'completado';
+        // Completados O confirmados que ya pasaron
+        return reserva.estado === 'completado' || 
+               (reserva.estado === 'confirmado' && vueloPasado);
+      
       case 'cancelados':
+        // Solo cancelados
         return reserva.estado === 'cancelado';
+      
       default:
         return true;
     }
@@ -166,6 +182,20 @@ export const MisViajes: React.FC = () => {
     }
     return imagen;
   };
+
+  // Contadores para los tabs
+  const contadorProximos = reservas.filter(r => 
+    r.estado === 'confirmado' && !esVueloPasado(r.flight.fechahora_salida)
+  ).length;
+
+  const contadorPasados = reservas.filter(r => 
+    r.estado === 'completado' || 
+    (r.estado === 'confirmado' && esVueloPasado(r.flight.fechahora_salida))
+  ).length;
+
+  const contadorCancelados = reservas.filter(r => 
+    r.estado === 'cancelado'
+  ).length;
 
   if (authLoading || isLoading) {
     return (
@@ -215,9 +245,7 @@ export const MisViajes: React.FC = () => {
             >
               <i className="fas fa-plane-departure"></i>
               Próximos viajes
-              <span className="tab-count">
-                {reservas.filter(r => !r.isPast && r.estado !== 'cancelado').length}
-              </span>
+              <span className="tab-count">{contadorProximos}</span>
             </button>
             <button
               className={`tab ${activeTab === 'pasados' ? 'active' : ''}`}
@@ -225,9 +253,7 @@ export const MisViajes: React.FC = () => {
             >
               <i className="fas fa-history"></i>
               Historial
-              <span className="tab-count">
-                {reservas.filter(r => r.isPast || r.estado === 'completado').length}
-              </span>
+              <span className="tab-count">{contadorPasados}</span>
             </button>
             <button
               className={`tab ${activeTab === 'cancelados' ? 'active' : ''}`}
@@ -235,9 +261,7 @@ export const MisViajes: React.FC = () => {
             >
               <i className="fas fa-times-circle"></i>
               Cancelados
-              <span className="tab-count">
-                {reservas.filter(r => r.estado === 'cancelado').length}
-              </span>
+              <span className="tab-count">{contadorCancelados}</span>
             </button>
           </div>
 
@@ -321,7 +345,7 @@ export const MisViajes: React.FC = () => {
                         Ver destino
                       </button>
                       
-                      {reserva.canCancel && (
+                      {puedeCancelar(reserva) && (
                         <button
                           className="btn btn-danger"
                           onClick={() => handleCancelReservation(reserva.id)}

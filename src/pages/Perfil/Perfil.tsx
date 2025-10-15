@@ -190,7 +190,7 @@ export const Perfil: React.FC = () => {
         <div className="stat-item">
           <i className="fas fa-clock"></i>
           <div className="stat-content">
-            <h3>{userStats?.aniosComoMiembro || 1} {userStats?.aniosComoMiembro === 1 ? 'año' : 'años'}</h3>
+            <h3>{userStats?.aniosComoMiembro || 'Nuevo'}</h3>
             <p>Como miembro</p>
           </div>
         </div>

@@ -47,6 +47,8 @@ export const Home: React.FC = () => {
   const ciudadesOrigen = [
     'Buenos Aires',
     'Venecia',
+    'Mendoza',
+    'Salta',
     'Japón',
     'Australia',
     'Grecia',
