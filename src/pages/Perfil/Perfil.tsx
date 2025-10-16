@@ -1,21 +1,55 @@
 import './perfil.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import axios from 'axios';
+
+interface UserStats {
+  viajesCompletados: number;
+  proximoViaje: {
+    id: number;
+    destino: string;
+    fecha_vuelo: string;
+    precio_total: number;
+  } | null;
+  miembroDesde: string;
+  aniosComoMiembro: number;
+}
 
 export const Perfil: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUserContext } = useAuth();
   const navigate = useNavigate();
   
-
-  const [userStats] = useState({
-    fechaRegistro: '2023-03-15',
-    viajesCompletados: 2,
-    proximoViaje: 'Beijing, China',
-    fechaProximoViaje: '2025-09-15'
+  const [userStats, setUserStats] = useState<UserStats | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  
+  // Estados para edición
+  const [editData, setEditData] = useState({
+    nombre: user?.nombre || '',
+    apellido: user?.apellido || ''
   });
 
-  const [isEditing, setIsEditing] = useState(false);
+  useEffect(() => {
+    fetchUserStats();
+  }, []);
+
+  const fetchUserStats = async () => {
+    setIsLoading(true);
+    try {
+      const response = await axios.get<{ data: UserStats }>('/api/users/profile/stats', {
+        withCredentials: true
+      });
+      setUserStats(response.data.data);
+    } catch (error: any) {
+      console.error('Error al cargar estadísticas:', error);
+      setError('No se pudieron cargar las estadísticas');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -23,19 +57,72 @@ export const Perfil: React.FC = () => {
   };
 
   const handleEditToggle = () => {
+    if (isEditing) {
+      // Cancelar: restaurar valores originales
+      setEditData({
+        nombre: user?.nombre || '',
+        apellido: user?.apellido || ''
+      });
+    }
     setIsEditing(!isEditing);
-    // Aquí podrías implementar la lógica de edición
+    setError('');
+    setSuccess('');
   };
 
-  const calculateMembershipYears = () => {
-    const registrationDate = new Date(userStats.fechaRegistro);
-    const currentDate = new Date();
-    const diffTime = Math.abs(currentDate.getTime() - registrationDate.getTime());
-    const diffYears = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-    return diffYears || 1;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setEditData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
-  // Si no hay usuario (no debería pasar por ProtectedRoute, pero por seguridad)
+  const handleSaveChanges = async () => {
+    setError('');
+    setSuccess('');
+
+    // Validaciones
+    if (!editData.nombre.trim() || !editData.apellido.trim()) {
+      setError('El nombre y apellido son obligatorios');
+      return;
+    }
+
+    try {
+      const response = await axios.put<{ data: any }>(
+        '/api/users/profile/update',
+        {
+          nombre: editData.nombre,
+          apellido: editData.apellido
+        },
+        { withCredentials: true }
+      );
+
+      // Actualizar contexto de autenticación
+      if (updateUserContext) {
+        updateUserContext(response.data.data);
+      }
+
+      setSuccess('Perfil actualizado correctamente');
+      setIsEditing(false);
+
+      // Limpiar mensaje después de 3 segundos
+      setTimeout(() => setSuccess(''), 3000);
+
+    } catch (error: any) {
+      console.error('Error al actualizar perfil:', error);
+      setError(error.response?.data?.message || 'Error al actualizar perfil');
+    }
+  };
+
+  const formatearFecha = (fecha: string): string => {
+    return new Date(fecha).toLocaleDateString('es-AR', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    });
+  };
+
+  // Si no hay usuario
   if (!user) {
     return (
       <main className="container">
@@ -47,190 +134,246 @@ export const Perfil: React.FC = () => {
     );
   }
 
-  return (
-    <>
+  // Loading
+  if (isLoading) {
+    return (
       <main className="container">
-        {/* Header principal con información del usuario */}
-        <section className="profile-main-header">
-          <div className="profile-welcome">
-            <h1>Mi Perfil</h1>
-            <p>Gestiona tu información personal y preferencias de viaje</p>
+        <section className="hero">
+          <div className="loading-spinner"></div>
+          <p>Cargando perfil...</p>
+        </section>
+      </main>
+    );
+  }
+
+  return (
+    <main className="container">
+      {/* Header principal */}
+      <section className="profile-main-header">
+        <div className="profile-welcome">
+          <h1>Mi Perfil</h1>
+          <p>Gestiona tu información personal y preferencias de viaje</p>
+        </div>
+        
+        <div className="profile-user-card">
+          <div className="profile-avatar">
+            <i className="fas fa-user-circle"></i>
+          </div>
+          <div className="profile-info">
+            <h2>¡Hola, {user.nombre} {user.apellido}!</h2>
+            <p className="user-level">
+              <i className="fas fa-star"></i>
+              Miembro desde {userStats ? formatearFecha(userStats.miembroDesde) : '...'}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Estadísticas */}
+      <section className="profile-stats-compact">
+        <div className="stat-item">
+          <i className="fas fa-plane-arrival"></i>
+          <div className="stat-content">
+            <h3>{userStats?.viajesCompletados || 0}</h3>
+            <p>Viajes completados</p>
+          </div>
+        </div>
+        
+        <div className="stat-item">
+          <i className="fas fa-calendar-check"></i>
+          <div className="stat-content">
+            <h3>{userStats?.proximoViaje ? '1' : '0'}</h3>
+            <p>Próximo viaje</p>
+          </div>
+        </div>
+        
+        <div className="stat-item">
+          <i className="fas fa-clock"></i>
+          <div className="stat-content">
+            <h3>{userStats?.aniosComoMiembro || 'Nuevo'}</h3>
+            <p>Como miembro</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Grid de contenido */}
+      <div className="profile-content-grid">
+        {/* Formulario de información personal */}
+        <section className="budget-form profile-form">
+          <h3><i className="fas fa-user"></i> Información Personal</h3>
+          
+          {error && (
+            <div className="error-message">
+              <i className="fas fa-exclamation-triangle"></i>
+              {error}
+            </div>
+          )}
+          
+          {success && (
+            <div className="success-message">
+              <i className="fas fa-check-circle"></i>
+              {success}
+            </div>
+          )}
+          
+          <div className="form-group">
+            <label htmlFor="nombre">Nombre</label>
+            <input
+              type="text"
+              id="nombre"
+              name="nombre"
+              value={isEditing ? editData.nombre : user.nombre}
+              onChange={handleInputChange}
+              readOnly={!isEditing}
+              disabled={!isEditing}
+            />
           </div>
           
-          <div className="profile-user-card">
-            <div className="profile-avatar">
-              <i className="fas fa-user-circle"></i>
-            </div>
-            <div className="profile-info">
-              <h2>¡Hola, {user.nombre} {user.apellido}!</h2>
-              <p className="user-level">
-                <i className="fas fa-star"></i> Miembro VIP
-              </p>
-            </div>
+          <div className="form-group">
+            <label htmlFor="apellido">Apellido</label>
+            <input
+              type="text"
+              id="apellido"
+              name="apellido"
+              value={isEditing ? editData.apellido : user.apellido}
+              onChange={handleInputChange}
+              readOnly={!isEditing}
+              disabled={!isEditing}
+            />
           </div>
-        </section>
-
-        {/* Estadísticas compactas */}
-        <section className="profile-stats-compact">
-          <div className="stat-item">
-            <i className="fas fa-plane"></i>
-            <div>
-              <h3>{userStats.viajesCompletados}</h3>
-              <p>Viajes completados</p>
-            </div>
+          
+          <div className="form-group">
+            <label htmlFor="email">Correo electrónico</label>
+            <input
+              type="email"
+              id="email"
+              value={user.email}
+              readOnly
+              disabled
+            />
+            <small style={{ color: '#666', fontSize: '0.85rem', marginTop: '0.3rem', display: 'block' }}>
+              El correo electrónico no puede modificarse
+            </small>
           </div>
-          <div className="stat-item">
-            <i className="fas fa-calendar-check"></i>
-            <div>
-              <h3>1</h3>
-              <p>Próximo viaje</p>
-            </div>
-          </div>
-          <div className="stat-item">
-            <i className="fas fa-clock"></i>
-            <div>
-              <h3>{calculateMembershipYears()} años</h3>
-              <p>Miembro desde</p>
-            </div>
-          </div>
-        </section>
-
-        {/* Información personal e información compacta */}
-        <div className="profile-content-grid">
-          <section className="budget-form profile-form">
-            <h3><i className="fas fa-user"></i> Información Personal</h3>
-            <div className="form-group">
-              <label htmlFor="nombre">Nombre</label>
-              <input
-                type="text"
-                id="nombre"
-                value={user.nombre}
-                readOnly={!isEditing}
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="apellido">Apellido</label>
-              <input
-                type="text"
-                id="apellido"
-                value={user.apellido}
-                readOnly={!isEditing}
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="email">Correo electrónico</label>
-              <input
-                type="email"
-                id="email"
-                value={user.email}
-                readOnly={!isEditing}
-                disabled={!isEditing}
-              />
-            </div>
-            <div className="form-group">
-              <label htmlFor="id">ID de Usuario</label>
-              <input
-                type="text"
-                id="id"
-                value={user.id.toString()}
-                readOnly
-                disabled
-              />
-            </div>
-            
-            {isEditing ? (
-              <div className="edit-buttons">
-                <button 
-                  className="btn btn-full"
-                  onClick={() => setIsEditing(false)}
-                >
-                  <i className="fas fa-save"></i>
-                  Guardar cambios
-                </button>
-                <button 
-                  className="btn btn-outline btn-full"
-                  onClick={() => setIsEditing(false)}
-                >
-                  <i className="fas fa-times"></i>
-                  Cancelar
-                </button>
-              </div>
-            ) : (
+          
+          {isEditing ? (
+            <div className="edit-buttons" style={{ display: 'flex', gap: '1rem' }}>
+              <button 
+                className="btn btn-full"
+                onClick={handleSaveChanges}
+              >
+                <i className="fas fa-save"></i>
+                Guardar cambios
+              </button>
               <button 
                 className="btn btn-outline btn-full"
                 onClick={handleEditToggle}
               >
-                <i className="fas fa-edit"></i>
-                Editar información
+                <i className="fas fa-times"></i>
+                Cancelar
               </button>
-            )}
-          </section>
+            </div>
+          ) : (
+            <button 
+              className="btn btn-outline btn-full"
+              onClick={handleEditToggle}
+            >
+              <i className="fas fa-edit"></i>
+              Editar información
+            </button>
+          )}
+        </section>
 
-          <div className="profile-right-column">
-            {/* Próximo viaje */}
-            {userStats.proximoViaje && (
-              <section className="budget-form compact-trip">
-                <h3><i className="fas fa-suitcase-rolling"></i> Próximo Viaje</h3>
-                <div className="next-trip">
-                  <div className="trip-info">
-                    <h4>{userStats.proximoViaje}</h4>
-                    <p><i className="fas fa-calendar"></i> {new Date(userStats.fechaProximoViaje).toLocaleDateString('es-ES', { 
-                      day: 'numeric',
-                      month: 'short',
-                      year: 'numeric'
-                    })}</p>
-                  </div>
-                  <button className="btn btn-outline btn-small">
-                    <i className="fas fa-eye"></i>
-                    Ver detalles
-                  </button>
+        {/* Columna derecha */}
+        <div className="profile-right-column">
+          {/* Próximo viaje */}
+          {userStats?.proximoViaje ? (
+            <section className="budget-form compact-trip">
+              <h3><i className="fas fa-suitcase-rolling"></i> Próximo Viaje</h3>
+              <div className="next-trip">
+                <div className="trip-info">
+                  <h4>{userStats.proximoViaje.destino}</h4>
+                  <p>
+                    <i className="fas fa-calendar"></i> 
+                    {formatearFecha(userStats.proximoViaje.fecha_vuelo)}
+                  </p>
+                  <p>
+                    <i className="fas fa-dollar-sign"></i> 
+                    ${userStats.proximoViaje.precio_total.toLocaleString('es-AR')} USD
+                  </p>
                 </div>
-              </section>
-            )}
+                <button 
+                  className="btn btn-outline"
+                  onClick={() => navigate('/mis-viajes')}
+                >
+                  <i className="fas fa-eye"></i>
+                  Ver detalles
+                </button>
+              </div>
+            </section>
+          ) : (
+            <section className="budget-form compact-trip">
+              <h3><i className="fas fa-suitcase-rolling"></i> Próximo Viaje</h3>
+              <div className="next-trip">
+                <div className="trip-info">
+                  <p style={{ color: '#666', textAlign: 'center' }}>
+                    No tienes viajes programados
+                  </p>
+                </div>
+                <button 
+                  className="btn"
+                  onClick={() => navigate('/')}
+                >
+                  <i className="fas fa-search"></i>
+                  Buscar vuelos
+                </button>
+              </div>
+            </section>
+          )}
 
-            {/* Acciones principales - Solo 2 botones bonitos */}
-            <section className="profile-actions-compact">
-              <button className="action-btn-beautiful favorites">
-                <div className="action-bg"></div>
-                <div className="action-icon">
-                  <i className="fas fa-heart"></i>
-                </div>
-                <div className="action-content">
-                  <h4>Mis Favoritos</h4>
-                  <p>Destinos guardados</p>
-                </div>
-              </button>
+          {/* Botones de acción */}
+          <section className="profile-actions-compact">
+            <button 
+              className="action-btn-beautiful favorites"
+              onClick={() => navigate('/favoritos')}
+            >
+              <div className="action-bg"></div>
+              <div className="action-icon">
+                <i className="fas fa-heart"></i>
+              </div>
+              <div className="action-content">
+                <h4>Mis Favoritos</h4>
+                <p>Destinos guardados</p>
+              </div>
+            </button>
 
               <button 
                 className="action-btn-beautiful history"
-                onClick={() => navigate('/mis-viajes')}
+                onClick={() => navigate('/historial')}
               >
                 <div className="action-bg"></div>
                 <div className="action-icon">
-                  <i className="fas fa-suitcase-rolling"></i> 
+                  <i className="fas fa-history"></i>
                 </div>
                 <div className="action-content">
-                  <h4>Mis Viajes</h4>
-                  <p>Próximos y pasados</p>
+                  <h4>Historial</h4>
+                  <p>Viajes anteriores</p>
                 </div>
               </button>
             </section>
 
-            {/* Botón de cerrar sesión */}
-            <section className="logout-section-compact">
-              <button 
-                className="btn btn-outline btn-logout"
-                onClick={handleLogout}
-              >
-                <i className="fas fa-sign-out-alt"></i>
-                Cerrar Sesión
-              </button>
-            </section>
-          </div>
+          {/* Cerrar sesión */}
+          <section className="logout-section-compact">
+            <button 
+              className="btn btn-outline btn-logout"
+              onClick={handleLogout}
+            >
+              <i className="fas fa-sign-out-alt"></i>
+              Cerrar Sesión
+            </button>
+          </section>
         </div>
-      </main>
-    </>
+      </div>
+    </main>
   );
 };

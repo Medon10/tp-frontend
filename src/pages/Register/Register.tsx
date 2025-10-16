@@ -11,6 +11,7 @@ type UserData = {
   id: number;
   nombre: string;
   apellido: string;
+  rol: 'cliente' | 'admin';
 };
 
 type ValidationErrors = {
@@ -41,7 +42,6 @@ export const Register: React.FC = () => {
   const location = useLocation();
 
   const from = location.state?.from?.pathname || '/perfil';
-  const isDevelopment = window.location.hostname === 'localhost';
 
   // Redirigir si ya está autenticado
   useEffect(() => {
@@ -149,7 +149,7 @@ export const Register: React.FC = () => {
       }
 
       const response = await axios.post<RegisterResponse>(
-        `api/users/signup`, // Ajustar URL
+        `api/users/signup`, 
         {
           nombre: formData.nombre.trim(),
           apellido: formData.apellido.trim(),
@@ -211,24 +211,12 @@ export const Register: React.FC = () => {
           default:
             setErrors({ general: serverMessage || 'Error al crear la cuenta.' });
         }
-      } else if (error.request) {
+        } else if (error.request) {
         console.log('No hay respuesta del servidor');
-        
-        // Fallback solo en desarrollo
-        if (isDevelopment) {
-          console.log('Modo desarrollo: usando registro simulado');
-          const mockUser: UserData = {
-            email: formData.email,
-            id: Math.floor(Math.random() * 1000),
-            nombre: formData.nombre.trim(),
-            apellido: formData.apellido.trim()
-          };
-          login(mockUser);
-        } else {
-          setErrors({ 
-            general: 'Sin conexión al servidor. Verifica tu conexión a internet.' 
-          });
-        }
+        console.log('Request config:', error.config);
+        setErrors({
+          general: 'Sin conexión al servidor. Verifica tu conexión a internet.'
+        });
       } else {
         setErrors({ general: 'Error inesperado. Intenta de nuevo.' });
       }
@@ -362,18 +350,20 @@ export const Register: React.FC = () => {
                 )}
               </label>
               <div className="password-input-wrapper">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  required
-                  placeholder="Mínimo 6 caracteres"
-                  value={formData.password}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
-                  className={errors.password ? 'error' : ''}
-                  autoComplete="new-password"
-                />
-              </div>
+                <input type={showPassword ? "text" : "password"} id="password" required placeholder="minimo 6 caracteres" value={formData.password}
+                onChange={handleInputChange} 
+                disabled={isLoading} 
+                className={errors.password ? 'error' : ''} 
+                autoComplete="new-password" />
+                <button
+                type="button"
+                className="toggle-password"
+                onClick={togglePasswordVisibility}
+                disabled={isLoading}
+                aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}>
+                <i className={showPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+              </button>
+            </div>
             </div>
             
             <div className="form-group">
@@ -388,21 +378,30 @@ export const Register: React.FC = () => {
               </label>
               <div className="password-input-wrapper">
                 <input
-                  type={showConfirmPassword ? "text" : "password"}
-                  id="confirmPassword"
-                  required
-                  placeholder="Confirma tu contraseña"
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
-                  className={errors.confirmPassword ? 'error' : ''}
-                  autoComplete="new-password"
-                />
-              </div>
-            </div>
-            
-            <button 
-              type="submit" 
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                required
+                placeholder="Confirma tu contraseña"
+                value={formData.confirmPassword}
+                onChange={handleInputChange}
+                disabled={isLoading}
+                className={errors.confirmPassword ? 'error' : ''}
+                autoComplete="new-password"
+              />
+              <button
+                type="button"
+                className="toggle-password"
+                onClick={toggleConfirmPasswordVisibility}
+                disabled={isLoading}
+                aria-label={showConfirmPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+              >
+      <i className={showConfirmPassword ? "fas fa-eye-slash" : "fas fa-eye"}></i>
+    </button>
+  </div>
+</div>
+
+<button
+  type="submit"
               className={`btn btn-full ${isLoading ? 'btn-loading' : ''}`}
               disabled={isLoading}
             >
@@ -417,25 +416,10 @@ export const Register: React.FC = () => {
             </button>
           </form>
         </section>
-
-        <section className="auth-options">
-          <div className="auth-divider">
-            <span>o</span>
-          </div>
-        </section>
-
         <section className="auth-redirect">
           <p>¿Ya tienes cuenta? <a href="./login" className="link-primary">Inicia sesión aquí</a></p>
         </section>
       </main>
-
-      {/* Demo info banner - solo en desarrollo */}
-      {isDevelopment && (
-        <div className="demo-credentials">
-          <i className="fas fa-info-circle"></i>
-          <span><strong>Demo:</strong> Puedes registrarte con cualquier email</span>
-        </div>
-      )}
     </>
   );
 };

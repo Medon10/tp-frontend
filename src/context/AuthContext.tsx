@@ -15,6 +15,7 @@ type AuthContextType = {
   logout: () => void;
   isAuthenticated: boolean;
   loading: boolean;
+  updateUserContext: (updatedUser: User) => void;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -62,6 +63,10 @@ const checkAuth = async () => {
   }
 };
 
+const updateUserContext = (updatedUser: User) => {
+  setUser(updatedUser);
+};
+
   // Verificar autenticación al cargar
   useEffect(() => {
     checkAuth();
@@ -72,7 +77,8 @@ const checkAuth = async () => {
     login,
     logout,
     isAuthenticated: user !== null,
-    loading
+    loading,
+    updateUserContext
   };
 
   return (
