@@ -349,7 +349,7 @@ export const Perfil: React.FC = () => {
 
               <button 
                 className="action-btn-beautiful history"
-                onClick={() => navigate('/historial')}
+                onClick={() => navigate('/mis-viajes')}
               >
                 <div className="action-bg"></div>
                 <div className="action-icon">

@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './Admin.css';
-import { FlightForm } from '../../ValidateFunctions/ValidateFlightForm'; // Importa el nuevo formulario
-import type { Vuelo } from './types'; // Importa los tipos
+import { FlightForm } from '../../ValidateFunctions/ValidateFlightForm';
+import type { Vuelo } from './types';
+import { ConfirmationModal } from '../../components/layout/ConfirmationModal';
+import { Notification } from '../../components/layout/Notification';
+
+// La interfaz se declara aquí...
+interface ApiResponse {
+  message: string;
+}
 
 export const AdminVuelos: React.FC = () => {
   const [vuelos, setVuelos] = useState<Vuelo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-
-  // Estados para manejar el modal
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [vueloSeleccionado, setVueloSeleccionado] = useState<Vuelo | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [flightToDelete, setFlightToDelete] = useState<number | null>(null);
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     fetchVuelos();
@@ -20,8 +28,8 @@ export const AdminVuelos: React.FC = () => {
   const fetchVuelos = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('/api/flights', { withCredentials: true });
-      setVuelos((response.data as { data: Vuelo[] }).data || []);
+      const response = await axios.get<{ data: Vuelo[] }>('/api/flights', { withCredentials: true });
+      setVuelos(response.data.data || []);
     } catch (err) {
       setError('No se pudieron cargar los vuelos.');
     } finally {
@@ -29,7 +37,6 @@ export const AdminVuelos: React.FC = () => {
     }
   };
 
-  // Funciones para manejar el modal
   const handleOpenFormParaCrear = () => {
     setVueloSeleccionado(null);
     setIsFormOpen(true);
@@ -46,17 +53,33 @@ export const AdminVuelos: React.FC = () => {
 
   const handleFormSubmit = () => {
     handleCerrarForm();
-    fetchVuelos(); // Refresca la lista de vuelos después de guardar
+    fetchVuelos();
   };
 
-  const handleDelete = async (id: number) => {
-    if (window.confirm('¿Seguro que quieres eliminar este vuelo?')) {
-      try {
-        await axios.delete(`/api/flights/${id}`, { withCredentials: true });
-        fetchVuelos(); // Refresca la lista
-      } catch (error) {
-        alert('Error al eliminar el vuelo.');
+  const handleDelete = (id: number) => {
+    setFlightToDelete(id);
+    setIsConfirmOpen(true);
+  };
+
+  const executeDelete = async () => {
+    if (!flightToDelete) return;
+
+    setIsConfirmOpen(false);
+    try {
+      // ...y se usa aquí para definir el tipo de la respuesta.
+      const response = await axios.delete<ApiResponse>(`/api/flights/${flightToDelete}`, { withCredentials: true });
+      setNotification({ message: response.data.message, type: 'success' });
+      fetchVuelos();
+    } catch (error) {
+      if (axios.isAxiosError(error) && error.response) {
+        // Y también se usa aquí para interpretar la respuesta de error.
+        const errorMessage = (error.response.data as ApiResponse)?.message || 'Error al eliminar el vuelo.';
+        setNotification({ message: errorMessage, type: 'error' });
+      } else {
+        setNotification({ message: 'Ocurrió un error inesperado.', type: 'error' });
       }
+    } finally {
+      setFlightToDelete(null);
     }
   };
 
@@ -65,6 +88,8 @@ export const AdminVuelos: React.FC = () => {
 
   return (
     <main className="container admin-page">
+      {notification && <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />}
+
       <h1>Panel de Administración de Vuelos</h1>
       <button className="btn btn-primary" onClick={handleOpenFormParaCrear}>
         + Añadir Nuevo Vuelo
@@ -100,12 +125,21 @@ export const AdminVuelos: React.FC = () => {
         </table>
       </div>
 
-      {/* El Modal del Formulario */}
       {isFormOpen && (
         <FlightForm
           vueloAEditar={vueloSeleccionado}
           onFormSubmit={handleFormSubmit}
           onCancel={handleCerrarForm}
+        />
+      )}
+
+      {isConfirmOpen && (
+        <ConfirmationModal
+          message="¿Seguro que quieres eliminar este vuelo? Esta acción también eliminará todas las reservas y favoritos asociados."
+          onConfirm={executeDelete}
+          onCancel={() => setIsConfirmOpen(false)}
+          confirmText="Sí, eliminar"
+          confirmButtonClass="btn-danger"
         />
       )}
     </main>

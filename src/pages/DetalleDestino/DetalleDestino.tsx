@@ -5,31 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoriteContext';
 import { Notification } from '../../components/layout/Notification';
 import './DetalleDestino.css';
-
-interface Destino {
-  id: number;
-  nombre: string;
-  transporte: string[];
-  actividades: string[];
-  imagen: string;
-}
-interface Vuelo {
-  id: number;
-  fechahora_salida: string;
-  fechahora_llegada: string;
-  duracion: number;
-  aerolinea: string;
-  cantidad_asientos: number;
-<<<<<<< HEAD
-  capacidad_restante?: number;
-=======
-  capacidad_restante: number;
->>>>>>> origin/main
-  montoVuelo: number;
-  precio_por_persona: number;
-  origen: string;
-  destino: Destino;
-}
+import type { Vuelo, Destino } from '../Admin/types';
 
 export const DetalleDestino: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -97,15 +73,12 @@ export const DetalleDestino: React.FC = () => {
   
   const aerolineasUnicas = Array.from(new Set(vuelos.map(v => v.aerolinea)));
   const vuelosFiltrados = vuelos
-  .filter(vuelo => filtroAerolinea === 'todas' || vuelo.aerolinea === filtroAerolinea)
-  .sort((a, b) => {
-    const precioA = a.precio_por_persona ?? a.montoVuelo ?? 0;
-    const precioB = b.precio_por_persona ?? b.montoVuelo ?? 0;
-    
-    if (ordenPrecio === 'asc') return precioA - precioB;
-    if (ordenPrecio === 'desc') return precioB - precioA;
-    return 0;
-  });
+    .filter(vuelo => filtroAerolinea === 'todas' || vuelo.aerolinea === filtroAerolinea)
+    .sort((a, b) => {
+      if (ordenPrecio === 'asc') return a.montoVuelo - b.montoVuelo;
+      if (ordenPrecio === 'desc') return b.montoVuelo - a.montoVuelo;
+      return 0;
+    });
 
   if (isLoading) return <div className="container" style={{textAlign: 'center', padding: '4rem'}}>Cargando...</div>;
   if (error) return <div className="container error-message" style={{textAlign: 'center', padding: '4rem'}}>{error}</div>;
@@ -135,70 +108,7 @@ export const DetalleDestino: React.FC = () => {
           {vuelosFiltrados.length > 0 ? (
             <div className="vuelos-grid">{vuelosFiltrados.map((vuelo) => (<VueloCard key={vuelo.id} vuelo={vuelo} />))}</div>
           ) : (
-<<<<<<< HEAD
             <div className="no-vuelos"><i className="fas fa-plane-slash"></i><h3>No hay vuelos disponibles</h3><p>Intenta cambiar los filtros o vuelve más tarde</p></div>
-=======
-            <div className="vuelos-grid">
-              {vuelosFiltrados.map((vuelo) => (
-                <article key={vuelo.id} className="vuelo-card">
-                  <div className="vuelo-header">
-                    <div className="aerolinea">
-                      <i className="fas fa-plane"></i>
-                      <span>{vuelo.aerolinea}</span>
-                    </div>
-                    <button 
-                      className={`btn-favorite-vuelo ${isFavorite(vuelo.id) ? 'active' : ''}`}
-                      onClick={() => handleToggleFavorite(vuelo.id)}
-                      aria-label={isFavorite(vuelo.id) ? "Quitar de favoritos" : "Agregar a favoritos"}
-                      >
-                      <i className={isFavorite(vuelo.id) ? 'fas fa-heart' : 'far fa-heart'}></i>
-                    </button>
-                  </div>
-
-                  <div className="vuelo-ruta">
-                    <div className="origen">
-                      <span className="ciudad">{vuelo.origen}</span>
-                      <span className="hora">{formatearHora(vuelo.fechahora_salida)}</span>
-                      <span className="fecha">{formatearFecha(vuelo.fechahora_salida)}</span>
-                    </div>
-
-                    <div className="duracion">
-                      <i className="fas fa-arrow-right"></i>
-                      <span>{formatearDuracion(vuelo.duracion)}</span>
-                    </div>
-
-                    <div className="destino">
-                      <span className="ciudad">{destino.nombre}</span>
-                      <span className="hora">{formatearHora(vuelo.fechahora_llegada)}</span>
-                      <span className="fecha">{formatearFecha(vuelo.fechahora_llegada)}</span>
-                    </div>
-                  </div>
-
-                  <div className="vuelo-info">
-                    <div className="info-item">
-                    <i className="fas fa-chair"></i>
-                    <span>
-                      {vuelo.capacidad_restante ?? vuelo.cantidad_asientos ?? 0} asientos disponibles
-                    </span>
-                  </div>
-                </div>
-
-                <div className="vuelo-footer">
-                  <div className="precio">
-                    <span className="precio-label">Desde</span>
-                    <span className="precio-valor">
-                      ${(vuelo.precio_por_persona ?? vuelo.montoVuelo ?? 0).toLocaleString('es-AR')}
-                    </span>
-                    <span className="precio-moneda">USD/persona</span>
-                  </div>
-                  <button className="btn btn-primary">
-                    Reservar
-                  </button>
-                </div>
-                </article>
-              ))}
-            </div>
->>>>>>> origin/main
           )}
         </div>
       </section>

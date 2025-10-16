@@ -18,7 +18,7 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
     fechahora_llegada: '',
     montoVuelo: '',
     cantidad_asientos: '',
-    duracion: '',
+    duracion: '0', // Inicia en 0
   });
   const [destinos, setDestinos] = useState<Destino[]>([]);
   const [error, setError] = useState('');
@@ -54,6 +54,23 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
       });
     }
   }, [vueloAEditar]);
+
+  // Hook para calcular la duración automáticamente
+  useEffect(() => {
+    if (formData.fechahora_salida && formData.fechahora_llegada) {
+        const salida = new Date(formData.fechahora_salida);
+        const llegada = new Date(formData.fechahora_llegada);
+
+        if (llegada > salida) {
+            const diffMs = llegada.getTime() - salida.getTime();
+            const diffMins = Math.round(diffMs / 60000); // Convertir milisegundos a minutos
+            setFormData(prev => ({ ...prev, duracion: String(diffMins) }));
+        } else {
+            setFormData(prev => ({ ...prev, duracion: '0' }));
+        }
+    }
+  }, [formData.fechahora_salida, formData.fechahora_llegada]);
+
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -136,7 +153,13 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
           
           <div className="form-group">
             <label>Duración (minutos)</label>
-            <input type="number" name="duracion" value={formData.duracion} onChange={handleChange} required />
+            <input 
+              type="number" 
+              name="duracion" 
+              value={formData.duracion} 
+              readOnly 
+              style={{ backgroundColor: '#f0f0f0' }}
+            />
           </div>
 
           <div className="form-actions">

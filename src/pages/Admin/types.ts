@@ -1,6 +1,9 @@
 export interface Destino {
   id: number;
   nombre: string;
+  transporte: string[];
+  actividades: string[];
+  imagen: string;
 }
 
 export interface Vuelo {
@@ -13,4 +16,5 @@ export interface Vuelo {
   montoVuelo: number;
   cantidad_asientos: number;
   duracion: number;
+  capacidad_restante?: number;
 }

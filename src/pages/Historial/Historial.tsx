@@ -3,12 +3,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { ConfirmationModal } from '../../components/layout/ConfirmationModal';
+import { Notification } from '../../components/layout/Notification';
 
+// Se define la interfaz aquí para que el componente sea autocontenido
 interface Reserva {
   id: number;
   fecha_reserva: string;
   valor_reserva: number;
-  estado: 'confirmado' | 'cancelado' | 'completado';
+  estado: 'pendiente' | 'confirmado' | 'cancelado' | 'completado';
+  isPast: boolean;
+  canCancel: boolean;
   flight: {
     id: number;
     origen: string;
@@ -23,14 +28,16 @@ interface Reserva {
   };
 }
 
-type TabType = 'proximos' | 'pasados' | 'cancelados';
-
 export const Historial: React.FC = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [activeTab, setActiveTab] = useState<TabType>('proximos');
+  const [activeTab, setActiveTab] = useState<string>('proximos');
   const [cancelingId, setCancelingId] = useState<number | null>(null);
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [reservationToCancel, setReservationToCancel] = useState<number | null>(null);
+  // Esta es la línea que faltaba
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
   const { isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -48,15 +55,12 @@ export const Historial: React.FC = () => {
   const fetchReservas = async () => {
     setIsLoading(true);
     setError('');
-
     try {
       const response = await axios.get<{ data: Reserva[] }>('/api/reservations/misviajes', {
         withCredentials: true
       });
-
       setReservas(response.data.data || []);
     } catch (error: any) {
-      console.error('Error al cargar reservas:', error);
       if (error.response?.status === 401) {
         navigate('/login');
       } else {
@@ -67,45 +71,30 @@ export const Historial: React.FC = () => {
     }
   };
 
-  // Función para verificar si un vuelo ya pasó
-  const esVueloPasado = (fechaSalida: string): boolean => {
-    const fechaVuelo = new Date(fechaSalida);
-    const hoy = new Date();
-    return fechaVuelo < hoy;
+  const handleCancelReservation = (reservaId: number) => {
+    setReservationToCancel(reservaId);
+    setIsConfirmOpen(true);
   };
 
-  // Función para verificar si se puede cancelar
-  const puedeCancelar = (reserva: Reserva): boolean => {
-    return reserva.estado === 'confirmado' && !esVueloPasado(reserva.flight.fechahora_salida);
-  };
+  const executeCancelReservation = async () => {
+    if (!reservationToCancel) return;
 
-  const handleCancelReservation = async (reservaId: number) => {
-    if (!window.confirm('¿Estás seguro de que deseas cancelar esta reserva?')) {
-      return;
-    }
-
-    setCancelingId(reservaId);
+    setCancelingId(reservationToCancel);
+    setIsConfirmOpen(false);
 
     try {
-      await axios.patch(`/api/reservations/${reservaId}/cancel`, {}, {
+      await axios.patch(`/api/reservations/${reservationToCancel}/cancel`, {}, {
         withCredentials: true
       });
-
-      // Actualizar el estado local
-      setReservas(prev =>
-        prev.map(reserva =>
-          reserva.id === reservaId
-            ? { ...reserva, estado: 'cancelado' }
-            : reserva
-        )
-      );
-
-      alert('Reserva cancelada exitosamente');
+      // Ahora se usa la notificación personalizada para el éxito.
+      setNotification({ message: 'Reserva cancelada exitosamente', type: 'success' });
+      fetchReservas();
     } catch (error: any) {
-      console.error('Error al cancelar reserva:', error);
-      alert(error.response?.data?.message || 'Error al cancelar la reserva');
+      // Y también para los errores.
+      setNotification({ message: error.response?.data?.message || 'Error al cancelar la reserva', type: 'error' });
     } finally {
       setCancelingId(null);
+      setReservationToCancel(null);
     }
   };
 
@@ -126,85 +115,43 @@ export const Historial: React.FC = () => {
 
   const getEstadoBadgeClass = (estado: string): string => {
     switch (estado) {
-      case 'confirmado':
-        return 'badge-confirmado';
-      case 'cancelado':
-        return 'badge-cancelado';
-      case 'completado':
-        return 'badge-completado';
-      default:
-        return '';
+      case 'confirmado': return 'badge-confirmado';
+      case 'pendiente': return 'badge-pendiente';
+      case 'cancelado': return 'badge-cancelado';
+      case 'completado': return 'badge-completado';
+      default: return '';
     }
   };
 
   const getEstadoTexto = (estado: string): string => {
-    switch (estado) {
-      case 'confirmado':
-        return 'Confirmado';
-      case 'cancelado':
-        return 'Cancelado';
-      case 'completado':
-        return 'Completado';
-      default:
-        return estado;
-    }
+    return estado.charAt(0).toUpperCase() + estado.slice(1);
   };
 
-  // Filtrado corregido para evitar duplicados
+  const getImageUrl = (imagen: string | null | undefined): string => {
+    if (!imagen) return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop';
+    if (imagen.startsWith('http')) return imagen;
+    return `http://localhost:3000${imagen}`;
+  };
+
   const reservasFiltradas = reservas.filter(reserva => {
-    const vueloPasado = esVueloPasado(reserva.flight.fechahora_salida);
-    
     switch (activeTab) {
       case 'proximos':
-        // Solo confirmados que NO hayan pasado
-        return reserva.estado === 'confirmado' && !vueloPasado;
-      
+        return !reserva.isPast && reserva.estado !== 'cancelado';
       case 'pasados':
-        // Completados O confirmados que ya pasaron
-        return reserva.estado === 'completado' || 
-               (reserva.estado === 'confirmado' && vueloPasado);
-      
+        return reserva.isPast || reserva.estado === 'completado';
       case 'cancelados':
-        // Solo cancelados
         return reserva.estado === 'cancelado';
-      
       default:
         return true;
     }
   });
-
-  const getImageUrl = (imagen: string | null | undefined): string => {
-    if (!imagen) {
-      return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop';
-    }
-    if (imagen.startsWith('http://') || imagen.startsWith('https://')) {
-      return imagen;
-    }
-    return imagen;
-  };
-
-  // Contadores para los tabs
-  const contadorProximos = reservas.filter(r => 
-    r.estado === 'confirmado' && !esVueloPasado(r.flight.fechahora_salida)
-  ).length;
-
-  const contadorPasados = reservas.filter(r => 
-    r.estado === 'completado' || 
-    (r.estado === 'confirmado' && esVueloPasado(r.flight.fechahora_salida))
-  ).length;
-
-  const contadorCancelados = reservas.filter(r => 
-    r.estado === 'cancelado'
-  ).length;
 
   if (authLoading || isLoading) {
     return (
       <main className="container">
         <section className="hero">
           <h1>Cargando tus viajes...</h1>
-          <div className="loading-spinner">
-            <i className="fas fa-spinner fa-spin"></i>
-          </div>
+          <div className="loading-spinner"><i className="fas fa-spinner fa-spin"></i></div>
         </section>
       </main>
     );
@@ -214,13 +161,8 @@ export const Historial: React.FC = () => {
     return (
       <main className="container">
         <section className="hero">
-          <div className="error-message">
-            <i className="fas fa-exclamation-triangle"></i>
-            {error}
-          </div>
-          <button className="btn" onClick={fetchReservas}>
-            Intentar de nuevo
-          </button>
+          <div className="error-message"><i className="fas fa-exclamation-triangle"></i>{error}</div>
+          <button className="btn" onClick={fetchReservas}>Intentar de nuevo</button>
         </section>
       </main>
     );
@@ -228,6 +170,8 @@ export const Historial: React.FC = () => {
 
   return (
     <main className="mis-viajes-page">
+      {notification && <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />}
+      
       <section className="mis-viajes-hero">
         <div className="container">
           <h1>Mis Viajes</h1>
@@ -237,7 +181,6 @@ export const Historial: React.FC = () => {
 
       <section className="mis-viajes-content">
         <div className="container">
-          {/* Tabs */}
           <div className="tabs">
             <button
               className={`tab ${activeTab === 'proximos' ? 'active' : ''}`}
@@ -245,7 +188,9 @@ export const Historial: React.FC = () => {
             >
               <i className="fas fa-plane-departure"></i>
               Próximos viajes
-              <span className="tab-count">{contadorProximos}</span>
+              <span className="tab-count">
+                {reservas.filter(r => !r.isPast && r.estado !== 'cancelado').length}
+              </span>
             </button>
             <button
               className={`tab ${activeTab === 'pasados' ? 'active' : ''}`}
@@ -253,7 +198,9 @@ export const Historial: React.FC = () => {
             >
               <i className="fas fa-history"></i>
               Historial
-              <span className="tab-count">{contadorPasados}</span>
+              <span className="tab-count">
+                {reservas.filter(r => r.isPast || r.estado === 'completado').length}
+              </span>
             </button>
             <button
               className={`tab ${activeTab === 'cancelados' ? 'active' : ''}`}
@@ -261,11 +208,12 @@ export const Historial: React.FC = () => {
             >
               <i className="fas fa-times-circle"></i>
               Cancelados
-              <span className="tab-count">{contadorCancelados}</span>
+              <span className="tab-count">
+                {reservas.filter(r => r.estado === 'cancelado').length}
+              </span>
             </button>
           </div>
 
-          {/* Lista de reservas */}
           {reservasFiltradas.length === 0 ? (
             <div className="no-reservas">
               <i className="fas fa-suitcase-rolling"></i>
@@ -345,7 +293,7 @@ export const Historial: React.FC = () => {
                         Ver destino
                       </button>
                       
-                      {puedeCancelar(reserva) && (
+                      {reserva.canCancel && (
                         <button
                           className="btn btn-danger"
                           onClick={() => handleCancelReservation(reserva.id)}
@@ -372,6 +320,16 @@ export const Historial: React.FC = () => {
           )}
         </div>
       </section>
+
+      {isConfirmOpen && (
+        <ConfirmationModal
+          message="¿Estás seguro de que deseas cancelar esta reserva?"
+          onConfirm={executeCancelReservation}
+          onCancel={() => setIsConfirmOpen(false)}
+          confirmText="Sí, cancelar"
+          confirmButtonClass="btn-danger"
+        />
+      )}
     </main>
   );
 };
