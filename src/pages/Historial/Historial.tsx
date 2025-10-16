@@ -36,7 +36,6 @@ export const Historial: React.FC = () => {
   const [cancelingId, setCancelingId] = useState<number | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [reservationToCancel, setReservationToCancel] = useState<number | null>(null);
-  // Esta es la línea que faltaba
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
 
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -86,11 +85,9 @@ export const Historial: React.FC = () => {
       await axios.patch(`/api/reservations/${reservationToCancel}/cancel`, {}, {
         withCredentials: true
       });
-      // Ahora se usa la notificación personalizada para el éxito.
       setNotification({ message: 'Reserva cancelada exitosamente', type: 'success' });
       fetchReservas();
     } catch (error: any) {
-      // Y también para los errores.
       setNotification({ message: error.response?.data?.message || 'Error al cancelar la reserva', type: 'error' });
     } finally {
       setCancelingId(null);

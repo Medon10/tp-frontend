@@ -1,7 +1,10 @@
 import './Home.css';
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+import { Notification } from '../../components/layout/Notification';
+import type { Destino } from '../Admin/types'; // Importamos el tipo Destino
 
 interface Vuelo {
   id: number;
@@ -32,7 +35,9 @@ interface ResultadosBusqueda {
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
-  
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
+
   const [formData, setFormData] = useState({
     presupuesto: '',
     personas: '1',
@@ -43,26 +48,23 @@ export const Home: React.FC = () => {
   const [resultados, setResultados] = useState<ResultadosBusqueda | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
+  const [ciudadesOrigen, setCiudadesOrigen] = useState<Destino[]>([]);
 
-  const ciudadesOrigen = [
-    'Buenos Aires',
-    'Venecia',
-    'Mendoza',
-    'Salta',
-    'Japón',
-    'Australia',
-    'Grecia',
-    'Egipto',
-    'Islandia',
-    'Noruega',
-    'Marruecos',
-    'Nueva Zelanda',
-    'Peru',
-    'Pisos Picados',
-    'Tailandia',
-    'Tierra del Fuego',
-    'Kino Der Toten'
-  ];
+  // Efecto para cargar las ciudades de origen desde el backend
+  useEffect(() => {
+    const fetchCiudades = async () => {
+      try {
+        const response = await axios.get<{ data: Destino[] }>('/api/destinies');
+        setCiudadesOrigen(response.data.data || []);
+      } catch (err) {
+        console.error("Error al cargar las ciudades de origen", err);
+        // Opcional: manejar el error, por ahora se usará una lista vacía
+      }
+    };
+    fetchCiudades();
+  }, []);
+
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { id, value } = e.target;
@@ -96,20 +98,33 @@ export const Home: React.FC = () => {
         { withCredentials: true }
       );
 
-      console.log(' Respuesta recibida:', response.data); 
-      console.log('Cantidad de resultados:', response.data.data?.length);
-
       setResultados(response.data);
-      console.log('Estado actualizado, resultados:', response.data.data);
     } catch (error: any) {
       console.error('Error al buscar vuelos:', error);
-      console.log('Detalles del error:', error.response?.data);
       setError(error.response?.data?.message || 'Error al buscar vuelos. Intenta de nuevo.');
       setResultados(null);
     } finally {
       setIsLoading(false);
     }
   };
+
+  const handleReserve = async (vuelo: Vuelo) => {
+    if (!isAuthenticated) {
+      navigate('/login', { state: { from: location } });
+      return;
+    }
+
+    try {
+      const response = await axios.post<{ message: string }>('/api/reservations', {
+        flight_id: vuelo.id,
+        personas: Number(formData.personas),
+      }, { withCredentials: true });
+      setNotification({ message: response.data.message, type: 'success' });
+    } catch (err: any) {
+      setNotification({ message: err.response?.data?.message || 'Error al procesar la reserva.', type: 'error' });
+    }
+  };
+
 
   const formatearPrecio = (precio: number): string => {
     return precio.toLocaleString('es-AR');
@@ -130,16 +145,17 @@ export const Home: React.FC = () => {
     if (imagen.startsWith('http://') || imagen.startsWith('https://')) {
       return imagen;
     }
-    return imagen;
+    return `/uploads/destinos/${imagen.split('/').pop()}`;
   };
 
   return (
     <>
       <main className="container">
+      {notification && <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />}
         <section className="hero">
           <h1>Vacation Match</h1>
           <p>
-            Ingrese un presupuesto y te mostraremos las mejores opciones para tus vacaciones.
+            Ingresa un presupuesto y te mostraremos las mejores opciones para tus vacaciones.
           </p>
         </section>
 
@@ -192,8 +208,8 @@ export const Home: React.FC = () => {
                 disabled={isLoading}
               >
                 {ciudadesOrigen.map(ciudad => (
-                  <option key={ciudad} value={ciudad}>
-                    {ciudad}
+                  <option key={ciudad.id} value={ciudad.nombre}>
+                    {ciudad.nombre}
                   </option>
                 ))}
               </select>
@@ -230,8 +246,7 @@ export const Home: React.FC = () => {
           <section className="results">
             <h2>Destinos recomendados para tu presupuesto</h2>
             <div className="packages">
-              {resultados.data.map((vuelo) => {
-                return (
+              {resultados.data.map((vuelo) => (
                 <div key={vuelo.id} className="package-card">
                   <div 
                     className="package-image"
@@ -271,11 +286,17 @@ export const Home: React.FC = () => {
                       >
                         Ver Detalles
                       </button>
+                      <button 
+                        className="btn"
+                        onClick={() => handleReserve(vuelo)}
+                        disabled={!vuelo.capacidad_restante || vuelo.capacidad_restante <= 0}
+                      >
+                        Reservar
+                      </button>
                     </div>
                   </div>
                 </div>
-              )
-              })}
+              ))}
             </div>
           </section>
         )}
@@ -307,4 +328,3 @@ export const Home: React.FC = () => {
     </>
   );
 };
-  
