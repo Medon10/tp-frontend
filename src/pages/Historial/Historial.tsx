@@ -6,7 +6,6 @@ import { useAuth } from '../../context/AuthContext';
 import { ConfirmationModal } from '../../components/layout/ConfirmationModal';
 import { Notification } from '../../components/layout/Notification';
 
-// Se define la interfaz aquí para que el componente sea autocontenido
 interface Reserva {
   id: number;
   fecha_reserva: string;

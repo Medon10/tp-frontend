@@ -21,7 +21,7 @@ return (
             <a href="./destinos">Destinos Populares</a>
             </li>
             <li>
-            <a href="./Home">Buscar por presupuesto</a>
+            <a href="./">Buscar por presupuesto</a>
             </li>
             </ul>
         </div>
@@ -35,7 +35,7 @@ return (
                 <a href="#">Términos y Condiciones</a>
             </li>
             <li>
-                <a href="tel: +542473464989">Telefono</a>
+                <a href="tel: +542473464989">Teléfono</a>
             </li>
             </ul>
         </div>

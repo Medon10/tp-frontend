@@ -120,9 +120,19 @@ export const DetalleDestino: React.FC = () => {
     const handleFavoriteToggle = async () => {
       if (!isAuthenticated) { navigate('/login', { state: { from: location } }); return; }
       try {
-        if (isFavorite(vuelo.id)) { await removeFavorite(vuelo.id); } else { await addFavorite(vuelo.id); }
-      } catch (error) {
-        setNotification({ message: 'Error al actualizar favoritos.', type: 'error' });
+        if (isFavorite(vuelo.id)) { 
+            await removeFavorite(vuelo.id);
+            setNotification({ message: 'Eliminado de favoritos.', type: 'success' });
+        } else { 
+            await addFavorite(vuelo.id); 
+            setNotification({ message: 'Agregado a favoritos.', type: 'success' });
+        }
+      } catch (error: any) {
+        if (error.response?.status === 409) {
+            setNotification({ message: 'Este vuelo ya está en tus favoritos.', type: 'error' });
+        } else {
+            setNotification({ message: 'Error al actualizar favoritos.', type: 'error' });
+        }
       }
     };
     
@@ -137,6 +147,8 @@ export const DetalleDestino: React.FC = () => {
       );
     };
 
+    const total = (vuelo.montoVuelo || 0) * personas;
+
     return (
       <article className="vuelo-card">
         <div className="vuelo-header">
@@ -146,9 +158,20 @@ export const DetalleDestino: React.FC = () => {
           </button>
         </div>
         <div className="vuelo-ruta">
-          <div className="origen"><span className="hora">{formatearHora(vuelo.fechahora_salida)}</span><span className="fecha">{formatearFecha(vuelo.fechahora_salida)}</span></div>
-          <div className="duracion"><span>{formatearDuracion(vuelo.duracion)}</span><div className="path-line"></div></div>
-          <div className="destino"><span className="hora">{formatearHora(vuelo.fechahora_llegada)}</span><span className="fecha">{formatearFecha(vuelo.fechahora_llegada)}</span></div>
+          <div className="origen">
+            <span className="ciudad">{vuelo.origen}</span>
+            <span className="hora">{formatearHora(vuelo.fechahora_salida)}</span>
+            <span className="fecha">{formatearFecha(vuelo.fechahora_salida)}</span>
+          </div>
+          <div className="duracion">
+            <span>{formatearDuracion(vuelo.duracion)}</span>
+            <div className="path-line"></div>
+          </div>
+          <div className="destino">
+            <span className="ciudad">{vuelo.destino.nombre}</span>
+            <span className="hora">{formatearHora(vuelo.fechahora_llegada)}</span>
+            <span className="fecha">{formatearFecha(vuelo.fechahora_llegada)}</span>
+          </div>
         </div>
         <div className="vuelo-footer">
           <div className="form-group">
@@ -159,7 +182,7 @@ export const DetalleDestino: React.FC = () => {
           </div>
           <div className="precio">
             <span className="precio-label">Total</span>
-            <span className="precio-valor">${(vuelo.montoVuelo * personas).toLocaleString()}</span>
+            <span className="precio-valor">${total.toLocaleString()}</span>
           </div>
           <button className="btn btn-primary" onClick={() => handleReserve(vuelo, personas)} disabled={!vuelo.capacidad_restante || vuelo.capacidad_restante <= 0}>
             Reservar

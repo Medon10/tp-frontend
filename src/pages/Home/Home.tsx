@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { Notification } from '../../components/layout/Notification';
-import type { Destino } from '../Admin/types'; // Importamos el tipo Destino
+import type { Destino } from '../Admin/types';
 
 interface Vuelo {
   id: number;
@@ -51,7 +51,6 @@ export const Home: React.FC = () => {
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
   const [ciudadesOrigen, setCiudadesOrigen] = useState<Destino[]>([]);
 
-  // Efecto para cargar las ciudades de origen desde el backend
   useEffect(() => {
     const fetchCiudades = async () => {
       try {
@@ -59,7 +58,6 @@ export const Home: React.FC = () => {
         setCiudadesOrigen(response.data.data || []);
       } catch (err) {
         console.error("Error al cargar las ciudades de origen", err);
-        // Opcional: manejar el error, por ahora se usará una lista vacía
       }
     };
     fetchCiudades();
