@@ -5,6 +5,7 @@ import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoriteContext';
 import { ReservationModal } from '../../components/layout/ReservationModal';
+import { Notification } from '../../components/layout/Notification';
 
 // --- INTERFACES ---
 interface Destino {
@@ -45,6 +46,7 @@ export const DetalleDestino: React.FC = () => {
   const [ordenPrecio, setOrdenPrecio] = useState<'asc' | 'desc' | 'none'>('none');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedFlight, setSelectedFlight] = useState<Vuelo | null>(null);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   // --- EFECTO DE CARGA DE DATOS ---
   useEffect(() => {
@@ -98,7 +100,7 @@ export const DetalleDestino: React.FC = () => {
 
   const handleReservationSuccess = () => {
     setIsModalOpen(false);
-    alert('¡Reserva confirmada exitosamente!');
+    setNotification({message: '¡Reserva confirmada exitosamente!', type: 'success'});
     fetchDestinoYVuelos();
   };
 
@@ -148,6 +150,13 @@ export const DetalleDestino: React.FC = () => {
   // --- RENDERIZADO PRINCIPAL ---
   return (
     <main className="detalle-destino-page">
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}  
       {/* Hero */}
       <section className="destino-hero-large" style={{ backgroundImage: `url(${getImageUrl(destino.imagen)})` }}>
         <div className="hero-overlay"><div className="container">
