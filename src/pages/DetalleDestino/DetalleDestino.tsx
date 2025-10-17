@@ -4,7 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoriteContext';
+import { ReservationModal } from '../../components/layout/ReservationModal';
 
+// --- INTERFACES ---
 interface Destino {
   id: number;
   nombre: string;
@@ -28,26 +30,50 @@ interface Vuelo {
 }
 
 export const DetalleDestino: React.FC = () => {
+  // --- HOOKS ---
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+  const { isAuthenticated } = useAuth();
+  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
+
+  // --- ESTADO ---
   const [destino, setDestino] = useState<Destino | null>(null);
   const [vuelos, setVuelos] = useState<Vuelo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [filtroAerolinea, setFiltroAerolinea] = useState('todas');
   const [ordenPrecio, setOrdenPrecio] = useState<'asc' | 'desc' | 'none'>('none');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState<Vuelo | null>(null);
 
-  const { isFavorite, addFavorite, removeFavorite } = useFavorites();
-  const { isAuthenticated } = useAuth();
+  // --- EFECTO DE CARGA DE DATOS ---
+  useEffect(() => {
+    fetchDestinoYVuelos();
+  }, [id]);
 
+  const fetchDestinoYVuelos = async () => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const destinoResponse = await axios.get(`/api/destinies/${id}`);
+      setDestino(destinoResponse.data.data);
+      const vuelosResponse = await axios.get(`/api/flights/destino/${id}`);
+      setVuelos(vuelosResponse.data.data || []);
+    } catch (error: any) {
+      console.error('Error al cargar datos:', error);
+      setError('No se pudieron cargar los datos. Intenta de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // --- MANEJADORES DE EVENTOS ---
   const handleToggleFavorite = async (flightId: number) => {
     if (!isAuthenticated) {
       alert('Debes iniciar sesión para guardar favoritos');
       navigate('/login');
       return;
     }
-
     try {
       if (isFavorite(flightId)) {
         await removeFavorite(flightId);
@@ -60,296 +86,194 @@ export const DetalleDestino: React.FC = () => {
     }
   };
 
-  useEffect(() => {
+  const handleReservarClick = (vuelo: Vuelo) => {
+    if (!isAuthenticated) {
+      alert('Debes iniciar sesión para reservar un vuelo');
+      navigate('/login');
+      return;
+    }
+    setSelectedFlight(vuelo);
+    setIsModalOpen(true);
+  };
+
+  const handleReservationSuccess = () => {
+    setIsModalOpen(false);
+    alert('¡Reserva confirmada exitosamente!');
     fetchDestinoYVuelos();
-  }, [id]);
-
-  const fetchDestinoYVuelos = async () => {
-    setIsLoading(true);
-    setError('');
-
-    try {
-      // Obtener destino
-      const destinoResponse = await axios.get(`/api/destinies/${id}`);
-      const destinoData = (destinoResponse.data as { data: Destino }).data;
-      setDestino(destinoData);
-
-      // Obtener vuelos del destino
-      const vuelosResponse = await axios.get(`/api/flights/destino/${id}`);
-      const vuelosData = (vuelosResponse.data as { data: Vuelo[] }).data;
-      setVuelos(vuelosData || []);
-    } catch (error: any) {
-      console.error('Error al cargar datos:', error);
-      setError('No se pudieron cargar los datos. Intenta de nuevo.');
-    } finally {
-      setIsLoading(false);
-    }
   };
 
-  const formatearFecha = (fecha: string): string => {
-    return new Date(fecha).toLocaleDateString('es-AR', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    });
-  };
-
-  const formatearHora = (fecha: string): string => {
-    return new Date(fecha).toLocaleTimeString('es-AR', {
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const formatearDuracion = (minutos: number): string => {
-    const horas = Math.floor(minutos / 60);
-    const mins = minutos % 60;
-    return `${horas}h ${mins}m`;
-  };
-
+  // --- FUNCIONES DE UTILIDAD (FORMATO) ---
+  const formatearFecha = (fecha: string): string => new Date(fecha).toLocaleDateString('es-AR', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  const formatearHora = (fecha: string): string => new Date(fecha).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+  const formatearDuracion = (minutos: number): string => `${Math.floor(minutos / 60)}h ${minutos % 60}m`;
   const getImageUrl = (imagen: string | null | undefined): string => {
-    if (!imagen) {
-      return `https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&h=400&fit=crop`;
-    }
-    if (imagen.startsWith('http://') || imagen.startsWith('https://')) {
-      return imagen;
-    }
+    if (!imagen) return `https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&h=400&fit=crop`;
+    if (imagen.startsWith('http')) return imagen;
     return imagen;
   };
 
-
-  //filtrado y ordenamiento de vuelos por aerolinea y precio
+  // --- LÓGICA DE FILTRADO Y ORDENAMIENTO ---
   const aerolineasUnicas = Array.from(new Set(vuelos.map(v => v.aerolinea)));
-
   const vuelosFiltrados = vuelos
-  .filter(vuelo => filtroAerolinea === 'todas' || vuelo.aerolinea === filtroAerolinea)
-  .sort((a, b) => {
-    const precioA = a.precio_por_persona ?? a.montoVuelo ?? 0;
-    const precioB = b.precio_por_persona ?? b.montoVuelo ?? 0;
-    
-    if (ordenPrecio === 'asc') return precioA - precioB;
-    if (ordenPrecio === 'desc') return precioB - precioA;
-    return 0;
-  });
+    .filter(vuelo => filtroAerolinea === 'todas' || vuelo.aerolinea === filtroAerolinea)
+    .sort((a, b) => {
+      const precioA = a.precio_por_persona ?? a.montoVuelo ?? 0;
+      const precioB = b.precio_por_persona ?? b.montoVuelo ?? 0;
+      if (ordenPrecio === 'asc') return precioA - precioB;
+      if (ordenPrecio === 'desc') return precioB - precioA;
+      return 0;
+    });
 
+  // --- RENDERIZADO CONDICIONAL ---
   if (isLoading) {
     return (
-      <main className="container">
-        <section className="hero">
-          <h1>Cargando...</h1>
-          <div className="loading-spinner">
-            <i className="fas fa-spinner fa-spin"></i>
-          </div>
-        </section>
-      </main>
+      <main className="container"><section className="hero">
+        <h1>Cargando...</h1>
+        <div className="loading-spinner"><i className="fas fa-spinner fa-spin"></i></div>
+      </section></main>
     );
   }
 
   if (error || !destino) {
     return (
-      <main className="container">
-        <section className="hero">
-          <div className="error-message">
-            <i className="fas fa-exclamation-triangle"></i>
-            {error || 'Destino no encontrado'}
-          </div>
-          <button className="btn" onClick={() => navigate('/destinos')}>
-            Volver a destinos
-          </button>
-        </section>
-      </main>
+      <main className="container"><section className="hero">
+        <div className="error-message">
+          <i className="fas fa-exclamation-triangle"></i> {error || 'Destino no encontrado'}
+        </div>
+        <button className="btn" onClick={() => navigate('/destinos')}>Volver a destinos</button>
+      </section></main>
     );
   }
 
+  // --- RENDERIZADO PRINCIPAL ---
   return (
     <main className="detalle-destino-page">
-      {/* Hero con imagen del destino */}
-      <section 
-        className="destino-hero-large"
-        style={{ backgroundImage: `url(${getImageUrl(destino.imagen)})` }}
-      >
-        <div className="hero-overlay">
-          <div className="container">
+      {/* Hero */}
+      <section className="destino-hero-large" style={{ backgroundImage: `url(${getImageUrl(destino.imagen)})` }}>
+        <div className="hero-overlay"><div className="container">
             <button className="btn-back" onClick={() => navigate('/destinos')}>
-              <i className="fas fa-arrow-left"></i>
-              Volver
+              <i className="fas fa-arrow-left"></i> Volver
             </button>
             <h1>{destino.nombre}</h1>
-            <div className="destino-quick-info">
-              {destino.transporte && destino.transporte.length > 0 && (
-                <div className="quick-info-item">
-                  <i className="fas fa-bus"></i>
-                  <span>{destino.transporte.join(', ')}</span>
-                </div>
-              )}
-              {destino.actividades && destino.actividades.length > 0 && (
-                <div className="quick-info-item">
-                  <i className="fas fa-hiking"></i>
-                  <span>{destino.actividades.slice(0, 3).join(', ')}</span>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
+        </div></div>
       </section>
 
-      {/* Vuelos disponibles */}
-      <section className="vuelos-section">
-        <div className="container">
-          <div className="vuelos-header">
-            <div>
-              <h2>Vuelos disponibles</h2>
-              <p className="vuelos-count">
-                {vuelosFiltrados.length} {vuelosFiltrados.length === 1 ? 'vuelo encontrado' : 'vuelos encontrados'}
-              </p>
-            </div>
-
+      {/* Vuelos */}
+      <section className="vuelos-section"><div className="container">
+        <div className="vuelos-header">
+            <h2>Vuelos disponibles</h2>
             <div className="filtros">
-              <div className="filtro-group">
-                <label htmlFor="aerolinea">
-                  <i className="fas fa-plane"></i>
-                  Aerolínea
-                </label>
-                <select 
-                  id="aerolinea"
+              <label>
+                Aerolínea:
+                <select
                   value={filtroAerolinea}
-                  onChange={(e) => setFiltroAerolinea(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFiltroAerolinea(e.target.value)}
                 >
                   <option value="todas">Todas</option>
-                  {aerolineasUnicas.map(aerolinea => (
-                    <option key={aerolinea} value={aerolinea}>
-                      {aerolinea}
-                    </option>
+                  {aerolineasUnicas.map(a => (
+                    <option key={a} value={a}>{a}</option>
                   ))}
                 </select>
-              </div>
+              </label>
 
-              <div className="filtro-group">
-                <label htmlFor="precio">
-                  <i className="fas fa-sort-amount-down"></i>
-                  Precio
-                </label>
-                <select 
-                  id="precio"
+              <label>
+                Ordenar por precio:
+                <select
                   value={ordenPrecio}
-                  onChange={(e) => setOrdenPrecio(e.target.value as any)}
+                  onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setOrdenPrecio(e.target.value as 'asc' | 'desc' | 'none')}
                 >
                   <option value="none">Sin ordenar</option>
                   <option value="asc">Menor a mayor</option>
                   <option value="desc">Mayor a menor</option>
                 </select>
-              </div>
+              </label>
             </div>
-          </div>
-
-          {vuelosFiltrados.length === 0 ? (
-            <div className="no-vuelos">
-              <i className="fas fa-plane-slash"></i>
-              <h3>No hay vuelos disponibles</h3>
-              <p>Intenta cambiar los filtros o vuelve más tarde</p>
-            </div>
-          ) : (
-            <div className="vuelos-grid">
-              {vuelosFiltrados.map((vuelo) => (
-                <article key={vuelo.id} className="vuelo-card">
-                  <div className="vuelo-header">
-                    <div className="aerolinea">
-                      <i className="fas fa-plane"></i>
-                      <span>{vuelo.aerolinea}</span>
-                    </div>
-                    <button 
-                      className={`btn-favorite-vuelo ${isFavorite(vuelo.id) ? 'active' : ''}`}
-                      onClick={() => handleToggleFavorite(vuelo.id)}
-                      aria-label={isFavorite(vuelo.id) ? "Quitar de favoritos" : "Agregar a favoritos"}
-                      >
-                      <i className={isFavorite(vuelo.id) ? 'fas fa-heart' : 'far fa-heart'}></i>
-                    </button>
-                  </div>
-
-                  <div className="vuelo-ruta">
-                    <div className="origen">
-                      <span className="ciudad">{vuelo.origen}</span>
-                      <span className="hora">{formatearHora(vuelo.fechahora_salida)}</span>
-                      <span className="fecha">{formatearFecha(vuelo.fechahora_salida)}</span>
-                    </div>
-
-                    <div className="duracion">
-                      <i className="fas fa-arrow-right"></i>
-                      <span>{formatearDuracion(vuelo.duracion)}</span>
-                    </div>
-
-                    <div className="destino">
-                      <span className="ciudad">{destino.nombre}</span>
-                      <span className="hora">{formatearHora(vuelo.fechahora_llegada)}</span>
-                      <span className="fecha">{formatearFecha(vuelo.fechahora_llegada)}</span>
-                    </div>
-                  </div>
-
-                  <div className="vuelo-info">
-                    <div className="info-item">
-                    <i className="fas fa-chair"></i>
-                    <span>
-                      {vuelo.capacidad_restante ?? vuelo.cantidad_asientos ?? 0} asientos disponibles
-                    </span>
-                  </div>
-                </div>
-
-                <div className="vuelo-footer">
-                  <div className="precio">
-                    <span className="precio-label">Desde</span>
-                    <span className="precio-valor">
-                      ${(vuelo.precio_por_persona ?? vuelo.montoVuelo ?? 0).toLocaleString('es-AR')}
-                    </span>
-                    <span className="precio-moneda">USD/persona</span>
-                  </div>
-                  <button className="btn btn-primary">
-                    Reservar
-                  </button>
-                </div>
-                </article>
-              ))}
-            </div>
-          )}
         </div>
-      </section>
+        
+        {vuelosFiltrados.length === 0 ? (
+          <div className="no-vuelos">
+              <p>No hay vuelos que coincidan con los filtros seleccionados.</p>
+          </div>
+        ) : (
+          <div className="vuelos-grid">
+            {vuelosFiltrados.map((vuelo) => (
+            <article key={vuelo.id} className="vuelo-card">
+           {/* ESTA ES LA SECCIÓN QUE PONE EL BOTÓN ARRIBA */}
+            <div className="vuelo-header">
+              <div className="aerolinea">
+                <i className="fas fa-plane"></i>
+                <span>{vuelo.aerolinea}</span>
+              </div>
+              <button
+                className={`btn-favorite-vuelo ${isFavorite(vuelo.id) ? 'active' : ''}`}
+                onClick={() => handleToggleFavorite(vuelo.id)}
+                aria-label={isFavorite(vuelo.id) ? "Quitar de favoritos" : "Agregar a favoritos"}
+              >
+                <i className={isFavorite(vuelo.id) ? 'fas fa-heart' : 'far fa-heart'}></i>
+              </button>
+            </div>
 
-      {/* Información adicional */}
+  {/* RUTA DEL VUELO */}
+  <div className="vuelo-ruta">
+    <div className="origen">
+      <span className="ciudad">{vuelo.origen}</span>
+      <span className="hora">{formatearHora(vuelo.fechahora_salida)}</span>
+      <span className="fecha">{formatearFecha(vuelo.fechahora_salida)}</span>
+    </div>
+    <div className="duracion">
+      <i className="fas fa-arrow-right"></i>
+      <span>{formatearDuracion(vuelo.duracion)}</span>
+    </div>
+    <div className="destino">
+      <span className="ciudad">{destino.nombre}</span>
+      <span className="hora">{formatearHora(vuelo.fechahora_llegada)}</span>
+      <span className="fecha">{formatearFecha(vuelo.fechahora_llegada)}</span>
+    </div>
+  </div>
+
+  {/* INFO EXTRA */}
+  <div className="vuelo-info">
+      <div className="info-item">
+      <i className="fas fa-chair"></i>
+      <span>
+        {vuelo.capacidad_restante ?? vuelo.cantidad_asientos ?? 0} asientos disponibles
+      </span>
+    </div>
+  </div>
+  
+  {/* FOOTER CON PRECIO Y BOTÓN RESERVAR (SIN EL BOTÓN DE FAVORITOS) */}
+  <div className="vuelo-footer">
+    <div className="precio">
+      <span className="precio-label">Desde</span>
+      <span className="precio-valor">
+        ${(vuelo.precio_por_persona ?? vuelo.montoVuelo ?? 0).toLocaleString('es-AR')}
+      </span>
+      <span className="precio-moneda">USD/persona</span>
+    </div>
+    <button className="btn btn-primary" onClick={() => handleReservarClick(vuelo)}>
+      Reservar
+    </button>
+  </div>
+</article>
+            ))}
+          </div>
+        )}
+      </div></section>
+      
+      {/* Info Extra */}
       <section className="destino-info-extra">
-        <div className="container">
-          <div className="info-cards">
-            <div className="info-card">
-              <i className="fas fa-info-circle"></i>
-              <h3>Sobre {destino.nombre}</h3>
-              <p>Descubre este increíble destino con nuestras mejores ofertas de vuelos.</p>
-            </div>
-
-            {destino.actividades && destino.actividades.length > 0 && (
-              <div className="info-card">
-                <i className="fas fa-map-marked-alt"></i>
-                <h3>Actividades populares</h3>
-                <ul>
-                  {destino.actividades.map((actividad, index) => (
-                    <li key={index}>{actividad}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-
-            {destino.transporte && destino.transporte.length > 0 && (
-              <div className="info-card">
-                <i className="fas fa-bus"></i>
-                <h3>Transporte local</h3>
-                <ul>
-                  {destino.transporte.map((transporte, index) => (
-                    <li key={index}>{transporte}</li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </div>
-        </div>
+          {/* ... */}
       </section>
+
+      {/* MODAL */}
+      {selectedFlight && (
+        <ReservationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          flight={selectedFlight}
+          onSuccess={handleReservationSuccess}
+        />
+      )}
     </main>
   );
 };
