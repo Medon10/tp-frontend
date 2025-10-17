@@ -4,7 +4,14 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
 import { Notification } from '../../components/layout/Notification';
-import type { Destino } from '../Admin/types';
+
+export interface Destino {
+  id: number;
+  nombre: string;
+  transporte: string[];
+  actividades: string[];
+  imagen: string;
+}
 
 interface Vuelo {
   id: number;
