@@ -18,13 +18,12 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
     fechahora_llegada: '',
     montoVuelo: '',
     cantidad_asientos: '',
-    duracion: '0', // Inicia en 0
+    duracion: '0', 
   });
   const [destinos, setDestinos] = useState<Destino[]>([]);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Cargar destinos para el <select>
   useEffect(() => {
     const fetchDestinos = async () => {
       try {
@@ -38,14 +37,12 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
     fetchDestinos();
   }, []);
 
-  // Si estamos editando, llenar el formulario con los datos del vuelo
   useEffect(() => {
     if (vueloAEditar) {
       setFormData({
         origen: vueloAEditar.origen,
         destino_id: String(vueloAEditar.destino.id),
         aerolinea: vueloAEditar.aerolinea,
-        // Formatear fechas para el input datetime-local
         fechahora_salida: new Date(vueloAEditar.fechahora_salida).toISOString().slice(0, 16),
         fechahora_llegada: new Date(vueloAEditar.fechahora_llegada).toISOString().slice(0, 16),
         montoVuelo: String(vueloAEditar.montoVuelo),
@@ -55,7 +52,6 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
     }
   }, [vueloAEditar]);
 
-  // Hook para calcular la duración automáticamente
   useEffect(() => {
     if (formData.fechahora_salida && formData.fechahora_llegada) {
         const salida = new Date(formData.fechahora_salida);
@@ -63,7 +59,7 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
 
         if (llegada > salida) {
             const diffMs = llegada.getTime() - salida.getTime();
-            const diffMins = Math.round(diffMs / 60000); // Convertir milisegundos a minutos
+            const diffMins = Math.round(diffMs / 60000);
             setFormData(prev => ({ ...prev, duracion: String(diffMins) }));
         } else {
             setFormData(prev => ({ ...prev, duracion: '0' }));
@@ -76,14 +72,34 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
 
+    const fechaSalida = new Date(formData.fechahora_salida);
+    const fechaLlegada = new Date(formData.fechahora_llegada);
+    
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); 
+
+    if (fechaSalida < hoy) {
+      setError('La fecha de salida no puede ser una fecha que ya ha pasado.');
+      setIsLoading(false);
+      return;
+    }
+    if (fechaLlegada <= fechaSalida) {
+      setError('La fecha de llegada debe ser posterior a la fecha de salida.');
+      setIsLoading(false);
+      return;
+    }
+
     const flightData = {
-      ...formData,
+      origen: formData.origen,
       destino_id: Number(formData.destino_id),
+      aerolinea: formData.aerolinea,
+      fechahora_salida: formData.fechahora_salida,
+      fechahora_llegada: formData.fechahora_llegada,
       montoVuelo: Number(formData.montoVuelo),
       cantidad_asientos: Number(formData.cantidad_asientos),
       duracion: Number(formData.duracion),
@@ -91,15 +107,12 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
 
     try {
       if (vueloAEditar) {
-        // --- Lógica de Edición (PUT) ---
         await axios.put(`/api/flights/${vueloAEditar.id}`, flightData, { withCredentials: true });
       } else {
-        // --- Lógica de Creación (POST) ---
         await axios.post('/api/flights', flightData, { withCredentials: true });
       }
-      onFormSubmit(); // Llama a la función para cerrar el modal y refrescar la tabla
+      onFormSubmit();
     } catch (err: any) {
-      console.error("Error al guardar el vuelo:", err);
       setError(err.response?.data?.message || 'Ocurrió un error al guardar.');
     } finally {
       setIsLoading(false);

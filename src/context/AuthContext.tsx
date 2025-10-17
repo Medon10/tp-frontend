@@ -67,7 +67,6 @@ const updateUserContext = (updatedUser: User) => {
   setUser(updatedUser);
 };
 
-  // Verificar autenticación al cargar
   useEffect(() => {
     checkAuth();
   }, []);
