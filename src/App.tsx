@@ -9,11 +9,9 @@ import { Register } from './pages/Register/Register.tsx';
 import { Destinos } from './pages/Destinos/Destinos.tsx';
 import { DetalleDestino } from './pages/DetalleDestino/DetalleDestino.tsx';
 import { ProtectedRoute } from './routes/ProtectedRoute.tsx';
-
-// --- Componentes de Rutas Protegidas ---
 import { Perfil } from './pages/Perfil/Perfil.tsx';
 import { Favoritos } from './pages/Favoritos/Favoritos.tsx'; 
-import { Historial } from './pages/Historial/Historial.tsx';
+import { MisViajes } from './pages/Historial/Historial.tsx';
 import { AdminVuelos } from './pages/Admin/AdminVuelos.tsx';
 
 
@@ -37,7 +35,7 @@ export default function App() {
 
           {/* Rutas Protegidas (requieren iniciar sesión) */}
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />
-          <Route path="/mis-viajes" element={<ProtectedRoute><Historial /></ProtectedRoute>} />
+          <Route path="/mis-viajes" element={<ProtectedRoute><MisViajes /></ProtectedRoute>} />
           <Route path="/favoritos" element={<ProtectedRoute><Favoritos /></ProtectedRoute>} />
           <Route path="/admin/flights" element={<ProtectedRoute><AdminVuelos /></ProtectedRoute>} />
           
