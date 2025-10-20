@@ -1,0 +1,36 @@
+.unauthorized-page .hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 60vh; /* Para que ocupe buen espacio vertical */
+  text-align: center;
+  padding: 2rem;
+}
+
+.unauthorized-content {
+  max-width: 550px;
+}
+
+/* El ícono de advertencia en grande y rojo */
+.unauthorized-icon {
+  font-size: 4rem; /* 64px */
+  color: #e63946; /* Un color rojo de "peligro" */
+  margin-bottom: 1.5rem;
+}
+
+.unauthorized-content h1 {
+  margin-bottom: 1rem;
+}
+
+.unauthorized-content p {
+  font-size: 1.125rem; /* 18px */
+  margin-bottom: 2rem;
+  color: var(--text-color-secondary); /* Si usas variables de color */
+}
+
+/* Asegura que el botón tenga un buen tamaño */
+.unauthorized-content .btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+}

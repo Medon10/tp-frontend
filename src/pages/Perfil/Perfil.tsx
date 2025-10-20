@@ -6,6 +6,7 @@ import axios from 'axios';
 
 interface UserStats {
   viajesCompletados: number;
+  proximosViajes: number;
   proximoViaje: {
     id: number;
     destino: string;
@@ -182,8 +183,8 @@ export const Perfil: React.FC = () => {
         <div className="stat-item">
           <i className="fas fa-calendar-check"></i>
           <div className="stat-content">
-            <h3>{userStats?.proximoViaje ? '1' : '0'}</h3>
-            <p>Próximo viaje</p>
+            <h3>{userStats?.proximosViajes || 0}</h3>
+            <p>{userStats?.proximosViajes === 1 ? 'Próximo viaje' : 'Próximos viajes'}</p>
           </div>
         </div>
         

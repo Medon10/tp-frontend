@@ -2,6 +2,9 @@ import './Home.css';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
+import { ReservationModal } from '../../components/layout/ReservationModal';
+import { Notification } from '../../components/layout/Notification';
 
 interface Vuelo {
   id: number;
@@ -14,6 +17,7 @@ interface Vuelo {
     actividades: string[];
   };
   fecha_hora: string;
+  fechahora_salida: string; 
   capacidad_restante: number;
   precio_por_persona: number;
   precio_total: number;
@@ -32,6 +36,7 @@ interface ResultadosBusqueda {
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   
   const [formData, setFormData] = useState({
     presupuesto: '',
@@ -43,6 +48,11 @@ export const Home: React.FC = () => {
   const [resultados, setResultados] = useState<ResultadosBusqueda | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  //  Estados para el modal y notificación
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState<Vuelo | null>(null);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const ciudadesOrigen = [
     'Buenos Aires',
@@ -96,18 +106,45 @@ export const Home: React.FC = () => {
         { withCredentials: true }
       );
 
-      console.log(' Respuesta recibida:', response.data); 
-      console.log('Cantidad de resultados:', response.data.data?.length);
+      console.log('✅ Respuesta recibida:', response.data); 
+      console.log('📊 Cantidad de resultados:', response.data.data?.length);
 
       setResultados(response.data);
-      console.log('Estado actualizado, resultados:', response.data.data);
     } catch (error: any) {
-      console.error('Error al buscar vuelos:', error);
-      console.log('Detalles del error:', error.response?.data);
+      console.error('❌ Error al buscar vuelos:', error);
       setError(error.response?.data?.message || 'Error al buscar vuelos. Intenta de nuevo.');
       setResultados(null);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  //  Función para abrir el modal de reserva
+  const handleReservarClick = (vuelo: Vuelo) => {
+    if (!isAuthenticated) {
+      setNotification({ message: 'Debes iniciar sesión para reservar. Redirigiendo...', type: 'error' });
+      setTimeout(() => navigate('/login'), 2000);
+      return;
+    }
+
+    // Adaptar el vuelo al formato del modal
+    const vueloParaModal = {
+      ...vuelo,
+      fechahora_salida: vuelo.fecha_hora, // Mapear fecha_hora a fechahora_salida
+      destino: vuelo.destino
+    };
+
+    setSelectedFlight(vueloParaModal);
+    setIsModalOpen(true);
+  };
+
+  //  Función cuando la reserva es exitosa
+  const handleReservationSuccess = () => {
+    setIsModalOpen(false);
+    setNotification({ message: '¡Reserva confirmada exitosamente!', type: 'success' });
+    // Opcional: recargar resultados para actualizar disponibilidad
+    if (resultados) {
+      handleSubmit(new Event('submit') as any);
     }
   };
 
@@ -135,6 +172,15 @@ export const Home: React.FC = () => {
 
   return (
     <>
+      {/*  Notificación */}
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+
       <main className="container">
         <section className="hero">
           <h1>Vacation Match</h1>
@@ -232,49 +278,61 @@ export const Home: React.FC = () => {
             <div className="packages">
               {resultados.data.map((vuelo) => {
                 return (
-                <div key={vuelo.id} className="package-card">
-                  <div 
-                    className="package-image"
-                    style={{ backgroundImage: `url(${getImageUrl(vuelo.destino.imagen)})` }}
-                  ></div>
-                  <div className="package-content">
-                    <h3 className="package-title">{vuelo.destino.nombre}</h3>
-                    <p className="package-price">${formatearPrecio(vuelo.precio_total)} USD</p>
-                    <div className="package-details">
-                      <div className="package-detail">
-                        <i className="fas fa-plane-departure"></i>
-                        <span>Desde {vuelo.origen}</span>
-                      </div>
-                      <div className="package-detail">
-                        <i className="fas fa-calendar"></i>
-                        <span>{formatearFecha(vuelo.fecha_hora)}</span>
-                      </div>
-                      <div className="package-detail">
-                        <i className="fas fa-users"></i>
-                        <span>{vuelo.personas} pasajero{vuelo.personas > 1 ? 's' : ''}</span>
-                      </div>
-                      <div className="package-detail">
-                        <i className="fas fa-dollar-sign"></i>
-                        <span>${formatearPrecio(vuelo.precio_por_persona)} USD/persona</span>
-                      </div>
-                      {vuelo.destino.actividades && vuelo.destino.actividades.length > 0 && (
+                  <div key={vuelo.id} className="package-card">
+                    <div 
+                      className="package-image"
+                      style={{ backgroundImage: `url(${getImageUrl(vuelo.destino.imagen)})` }}
+                    ></div>
+                    <div className="package-content">
+                      <h3 className="package-title">{vuelo.destino.nombre}</h3>
+                      <p className="package-price">${formatearPrecio(vuelo.precio_total)} USD</p>
+                      <div className="package-details">
                         <div className="package-detail">
-                          <i className="fas fa-star"></i>
-                          <span>{vuelo.destino.actividades.slice(0, 2).join(', ')}</span>
+                          <i className="fas fa-plane-departure"></i>
+                          <span>Desde {vuelo.origen}</span>
                         </div>
-                      )}
-                    </div>
-                    <div className="package-actions">
-                      <button 
-                        className="btn btn-outline"
-                        onClick={() => navigate(`/destinos/${vuelo.destino.id}`)}
-                      >
-                        Ver Detalles
-                      </button>
+                        <div className="package-detail">
+                          <i className="fas fa-calendar"></i>
+                          <span>{formatearFecha(vuelo.fecha_hora)}</span>
+                        </div>
+                        <div className="package-detail">
+                          <i className="fas fa-users"></i>
+                          <span>{vuelo.personas} pasajero{vuelo.personas > 1 ? 's' : ''}</span>
+                        </div>
+                        <div className="package-detail">
+                          <i className="fas fa-dollar-sign"></i>
+                          <span>${formatearPrecio(vuelo.precio_por_persona)} USD/persona</span>
+                        </div>
+                        <div className="package-detail">
+                          <i className="fas fa-chair"></i>
+                          <span>{vuelo.capacidad_restante} asientos disponibles</span>
+                        </div>
+                        {vuelo.destino.actividades && vuelo.destino.actividades.length > 0 && (
+                          <div className="package-detail">
+                            <i className="fas fa-star"></i>
+                            <span>{vuelo.destino.actividades.slice(0, 2).join(', ')}</span>
+                          </div>
+                        )}
+                      </div>
+                      {/*  Botones actualizados */}
+                      <div className="package-actions">
+                        <button 
+                          className="btn btn-outline"
+                          onClick={() => navigate(`/destinos/${vuelo.destino.id}`)}
+                        >
+                          Ver Detalles
+                        </button>
+                        <button 
+                          className="btn"
+                          onClick={() => handleReservarClick(vuelo)}
+                        >
+                          <i className="fas fa-check"></i>
+                          Reservar
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
+                );
               })}
             </div>
           </section>
@@ -304,7 +362,16 @@ export const Home: React.FC = () => {
           </div>
         </section>
       </main>
+
+      {/*  Modal de Reserva */}
+      {selectedFlight && (
+        <ReservationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          flight={selectedFlight}
+          onSuccess={handleReservationSuccess}
+        />
+      )}
     </>
   );
 };
-  

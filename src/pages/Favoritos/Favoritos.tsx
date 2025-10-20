@@ -1,13 +1,20 @@
 import './Favoritos.css';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoriteContext';
+import { ReservationModal } from '../../components/layout/ReservationModal';
+import { Notification } from '../../components/layout/Notification';
 
 export const Favoritos: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { favorites, removeFavorite, loading } = useFavorites();
+
+  //  Estados para el modal y notificación
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedFlight, setSelectedFlight] = useState<any | null>(null);
+  const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -18,10 +25,23 @@ export const Favoritos: React.FC = () => {
   const handleRemoveFavorite = async (flightId: number) => {
     try {
       await removeFavorite(flightId);
+      setNotification({ message: 'Eliminado de favoritos', type: 'success' });
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al eliminar de favoritos');
+      setNotification({ message: 'Error al eliminar de favoritos', type: 'error' });
     }
+  };
+
+  //  abrir el modal de reserva
+  const handleReservarClick = (vuelo: any) => {
+    setSelectedFlight(vuelo);
+    setIsModalOpen(true);
+  };
+
+  //  cuando la reserva es exitosa
+  const handleReservationSuccess = () => {
+    setIsModalOpen(false);
+    setNotification({ message: '¡Reserva confirmada exitosamente!', type: 'success' });
   };
 
   const formatearFecha = (fecha: string): string => {
@@ -61,6 +81,15 @@ export const Favoritos: React.FC = () => {
 
   return (
     <main className="favoritos-page">
+      {/*  Notificación */}
+      {notification && (
+        <Notification
+          message={notification.message}
+          type={notification.type}
+          onClose={() => setNotification(null)}
+        />
+      )}
+
       <div className="container">
         <div className="favoritos-header">
           <div>
@@ -103,7 +132,7 @@ export const Favoritos: React.FC = () => {
                   <div className="favorito-header">
                     <div className="aerolinea">
                       <i className="fas fa-plane"></i>
-                      <span>{vuelo.origen}</span>
+                      <span>{vuelo.aerolinea || vuelo.origen}</span>
                     </div>
                     <button 
                       className="btn-remove-favorite"
@@ -128,8 +157,12 @@ export const Favoritos: React.FC = () => {
 
                     <div className="destino">
                       <span className="ciudad">{vuelo.destino?.nombre || 'Destino'}</span>
-                      <span className="hora">{formatearHora(vuelo.fechahora_llegada)}</span>
-                      <span className="fecha">{formatearFecha(vuelo.fechahora_llegada)}</span>
+                      {vuelo.fechahora_llegada && (
+                        <>
+                          <span className="hora">{formatearHora(vuelo.fechahora_llegada)}</span>
+                          <span className="fecha">{formatearFecha(vuelo.fechahora_llegada)}</span>
+                        </>
+                      )}
                     </div>
                   </div>
 
@@ -159,9 +192,10 @@ export const Favoritos: React.FC = () => {
                       >
                         Ver destino
                       </button>
+                      {/*  Botón de reservar actualizado */}
                       <button 
                         className="btn btn-primary"
-                        onClick={() => navigate(`/reservar/${vuelo.id}`)}
+                        onClick={() => handleReservarClick(vuelo)}
                       >
                         Reservar
                       </button>
@@ -178,6 +212,16 @@ export const Favoritos: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/*  Modal de Reserva */}
+      {selectedFlight && (
+        <ReservationModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          flight={selectedFlight}
+          onSuccess={handleReservationSuccess}
+        />
+      )}
     </main>
   );
 };
