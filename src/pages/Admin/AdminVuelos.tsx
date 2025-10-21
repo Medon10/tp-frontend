@@ -1,12 +1,33 @@
+import './Admin.css';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import './Admin.css';
 import { FlightForm } from '../../ValidateFunctions/ValidateFlightForm';
-import type { Vuelo } from './types';
 import { ConfirmationModal } from '../../components/layout/ConfirmationModal';
 import { Notification } from '../../components/layout/Notification';
 
-// La interfaz se declara aquí...
+interface Destino {
+  id: number;
+  nombre: string;
+  imagen?: string;
+  transporte?: string[];
+  actividades?: string[];
+}
+
+interface Vuelo {
+  id: number;
+  aerolinea: string;
+  origen: string;
+  fechahora_salida: string;
+  fechahora_llegada: string;
+  duracion: number;
+  cantidad_asientos: number;
+  montoVuelo: number;
+  distancia_km?: number;
+  capacidad_restante?: number;
+  destino?: Destino;
+  destino_id?: number;
+}
+
 interface ApiResponse {
   message: string;
 }
@@ -27,11 +48,21 @@ export const AdminVuelos: React.FC = () => {
 
   const fetchVuelos = async () => {
     setIsLoading(true);
+    setError('');
     try {
-      const response = await axios.get<{ data: Vuelo[] }>('/api/flights', { withCredentials: true });
+      const response = await axios.get<{ data: Vuelo[] }>('/api/flights?populate=destino', { 
+        withCredentials: true 
+      });
+      
+      console.log('Vuelos recibidos:', response.data.data);
       setVuelos(response.data.data || []);
     } catch (err) {
+      console.error('Error al cargar vuelos:', err);
       setError('No se pudieron cargar los vuelos.');
+      setNotification({ 
+        message: 'Error al cargar los vuelos', 
+        type: 'error' 
+      });
     } finally {
       setIsLoading(false);
     }
@@ -49,10 +80,14 @@ export const AdminVuelos: React.FC = () => {
 
   const handleCerrarForm = () => {
     setIsFormOpen(false);
+    setVueloSeleccionado(null);
   };
 
-  const handleFormSubmit = () => {
+  const handleFormSubmit = (message?: string, type?: 'success' | 'error') => {
     handleCerrarForm();
+    if (message && type) {
+      setNotification({ message, type });
+    }
     fetchVuelos();
   };
 
@@ -66,13 +101,21 @@ export const AdminVuelos: React.FC = () => {
 
     setIsConfirmOpen(false);
     try {
-      // ...y se usa aquí para definir el tipo de la respuesta.
-      const response = await axios.delete<ApiResponse>(`/api/flights/${flightToDelete}`, { withCredentials: true });
-      setNotification({ message: response.data.message, type: 'success' });
+      const response = await axios.delete<ApiResponse>(
+        `/api/flights/${flightToDelete}`, 
+        { withCredentials: true }
+      );
+      
+      setNotification({ 
+        message: response.data.message || 'Vuelo eliminado exitosamente', 
+        type: 'success' 
+      });
+      
       fetchVuelos();
     } catch (error) {
+      console.error('Error al eliminar vuelo:', error);
+      
       if (axios.isAxiosError(error) && error.response) {
-        // Y también se usa aquí para interpretar la respuesta de error.
         const errorMessage = (error.response.data as ApiResponse)?.message || 'Error al eliminar el vuelo.';
         setNotification({ message: errorMessage, type: 'error' });
       } else {
@@ -83,47 +126,132 @@ export const AdminVuelos: React.FC = () => {
     }
   };
 
-  if (isLoading) return <div className="container">Cargando...</div>;
-  if (error) return <div className="container error-message">{error}</div>;
+  const formatearFecha = (fecha: string): string => {
+    return new Date(fecha).toLocaleString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const formatearPrecio = (precio: number): string => {
+    return precio.toLocaleString('es-AR');
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container admin-page">
+        <div className="loading-container">
+          <i className="fas fa-spinner fa-spin"></i>
+          <p>Cargando vuelos...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && vuelos.length === 0) {
+    return (
+      <div className="container admin-page">
+        <div className="error-message">
+          <i className="fas fa-exclamation-triangle"></i>
+          {error}
+        </div>
+        <button className="btn btn-primary" onClick={fetchVuelos}>
+          Reintentar
+        </button>
+      </div>
+    );
+  }
 
   return (
     <main className="container admin-page">
-      {notification && <Notification message={notification.message} type={notification.type} onClose={() => setNotification(null)} />}
+      {notification && (
+        <Notification 
+          message={notification.message} 
+          type={notification.type} 
+          onClose={() => setNotification(null)} 
+        />
+      )}
 
-      <h1>Panel de Administración de Vuelos</h1>
-      <button className="btn btn-primary" onClick={handleOpenFormParaCrear}>
-        + Añadir Nuevo Vuelo
-      </button>
-
-      <div style={{ overflowX: 'auto', marginTop: '2rem' }}>
-        <table className="admin-table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Aerolínea</th>
-              <th>Origen/Destino</th>
-              <th>Salida</th>
-              <th>Precio</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {vuelos.map((vuelo) => (
-              <tr key={vuelo.id}>
-                <td>{vuelo.id}</td>
-                <td>{vuelo.aerolinea}</td>
-                <td>{vuelo.origen} → {vuelo.destino?.nombre || 'N/A'}</td>
-                <td>{new Date(vuelo.fechahora_salida).toLocaleString('es-AR')}</td>
-                <td>${vuelo.montoVuelo}</td>
-                <td className="actions">
-                  <button className="btn btn-outline" onClick={() => handleOpenFormParaEditar(vuelo)}>Editar</button>
-                  <button className="btn btn-danger" onClick={() => handleDelete(vuelo.id)}>Eliminar</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="admin-header">
+        <h1>Panel de Administración de Vuelos</h1>
+        <button className="btn btn-primary" onClick={handleOpenFormParaCrear}>
+          <i className="fas fa-plus"></i>
+          Añadir Nuevo Vuelo
+        </button>
       </div>
+
+      {vuelos.length === 0 ? (
+        <div className="empty-state">
+          <i className="fas fa-plane-slash"></i>
+          <h3>No hay vuelos registrados</h3>
+          <p>Comienza agregando tu primer vuelo</p>
+        </div>
+      ) : (
+        <div style={{ overflowX: 'auto', marginTop: '2rem' }}>
+          <table className="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Aerolínea</th>
+                <th>Origen / Destino</th>
+                <th>Salida</th>
+                <th>Llegada</th>
+                <th>Asientos</th>
+                <th>Precio (USD)</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {vuelos.map((vuelo) => (
+                <tr key={vuelo.id}>
+                  <td>{vuelo.id}</td>
+                  <td>
+                    <i className="fas fa-plane"></i> {vuelo.aerolinea}
+                  </td>
+                  <td>
+                    <div className="route-cell">
+                      <span className="origin">{vuelo.origen}</span>
+                      <i className="fas fa-arrow-right"></i>
+                      <span className="destination">
+                        {vuelo.destino?.nombre || vuelo.destino_id || 'Sin destino'}
+                      </span>
+                    </div>
+                  </td>
+                  <td>{formatearFecha(vuelo.fechahora_salida)}</td>
+                  <td>{formatearFecha(vuelo.fechahora_llegada)}</td>
+                  <td>
+                    <i className="fas fa-users"></i> {vuelo.cantidad_asientos}
+                  </td>
+                  <td className="price-cell">
+                    ${formatearPrecio(vuelo.montoVuelo)}
+                  </td>
+                  <td className="actions">
+                    <button 
+                      className="btn btn-outline btn-sm" 
+                      onClick={() => handleOpenFormParaEditar(vuelo)}
+                      title="Editar vuelo"
+                    >
+                      <i className="fas fa-edit"></i>
+                      Editar
+                    </button>
+                    <button 
+                      className="btn btn-danger btn-sm" 
+                      onClick={() => handleDelete(vuelo.id)}
+                      title="Eliminar vuelo"
+                    >
+                      <i className="fas fa-trash"></i>
+                      Eliminar
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {isFormOpen && (
         <FlightForm
