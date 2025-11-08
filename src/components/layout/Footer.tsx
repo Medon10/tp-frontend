@@ -21,7 +21,7 @@ return (
             <a href="./destinos">Destinos Populares</a>
             </li>
             <li>
-            <a href="./Home">Buscar por presupuesto</a>
+            <a href="./">Buscar por presupuesto</a>
             </li>
             </ul>
         </div>
