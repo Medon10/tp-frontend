@@ -1,4 +1,5 @@
-import './perfil.css';
+// Ajuste de import: el archivo se llama 'Perfil.css' (mayúscula P) y en sistemas case-sensitive en build falla si se usa 'perfil.css'
+import './Perfil.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
