@@ -1,6 +1,6 @@
 import './Destinos.css';
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
 
 interface Destino {
@@ -29,8 +29,8 @@ export const Destinos: React.FC = () => {
     setError('');
 
     try {
-      const response = await axios.get('/api/destinies', {
-        timeout: 10000
+      const response = await api.get('/destinies', {
+        timeout: 10000,
       });
 
       console.log('Destinos recibidos:', response.data);
@@ -71,7 +71,9 @@ export const Destinos: React.FC = () => {
     }
     
     // Si es una ruta relativa, construir la URL completa del backend
-    return `http://localhost:3000${imagen}`;
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+    const backendOrigin = apiUrl.replace(/\/?api\/?$/, '');
+    return `${backendOrigin}${imagen}`;
   };
 
   if (isLoading) {

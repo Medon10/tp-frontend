@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '../services/api';
 import type { Vuelo } from "../pages/Admin/types"
 import type { Destino } from "../pages/Admin/types"
 
@@ -28,8 +28,8 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
   useEffect(() => {
     const fetchDestinos = async () => {
       try {
-        const response = await axios.get('/api/destinies');
-        const data = response.data as { data: Destino[] };
+  const response = await api.get('/destinies');
+  const data = response.data as { data: Destino[] };
         setDestinos(data.data || []);
       } catch (err) {
         console.error("Error al cargar destinos", err);
@@ -90,7 +90,7 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
     try {
       if (vueloAEditar) {
         // Edición
-        await axios.put(
+        await api.put(
           `/api/flights/${vueloAEditar.id}`, 
           flightData, 
           { withCredentials: true }
@@ -98,7 +98,7 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
         onFormSubmit('Vuelo actualizado exitosamente', 'success');
       } else {
         // Creación
-        await axios.post(
+        await api.post(
           '/api/flights', 
           flightData, 
           { withCredentials: true }

@@ -3,7 +3,7 @@ import './Perfil.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import axios from 'axios';
+import { api } from '../../services/api';
 
 interface UserStats {
   viajesCompletados: number;
@@ -41,9 +41,9 @@ export const Perfil: React.FC = () => {
   const fetchUserStats = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get<{ data: UserStats }>('/api/users/profile/stats', {
-        withCredentials: true
-      });
+      const response = await api.get<{ data: UserStats }>(
+        '/users/profile/stats'
+      );
       setUserStats(response.data.data);
     } catch (error: any) {
       console.error('Error al cargar estadísticas:', error);
@@ -90,13 +90,12 @@ export const Perfil: React.FC = () => {
     }
 
     try {
-      const response = await axios.put<{ data: any }>(
-        '/api/users/profile/update',
+      const response = await api.put<{ data: any }>(
+        '/users/profile/update',
         {
           nombre: editData.nombre,
           apellido: editData.apellido
-        },
-        { withCredentials: true }
+        }
       );
 
       // Actualizar contexto de autenticación

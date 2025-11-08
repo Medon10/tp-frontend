@@ -1,5 +1,5 @@
 import { createContext, useState, useContext, useEffect, type ReactElement } from "react";
-import axios from "axios";
+import { api } from "../services/api";
 
 type User = {
   email: string;
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
   const logout = async () => {
     try {
       // Llamar al backend para limpiar la cookie
-      await axios.post('/api/users/logout', {}, { withCredentials: true });
+  await api.post('/users/logout', {});
     } catch (error) {
       console.error('Error en logout:', error);
     } finally {
@@ -42,8 +42,7 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
 const checkAuth = async () => {
   try {
     setLoading(true);
-    const response = await axios.get<{ data: User }>('/api/users/profile/me', { 
-      withCredentials: true,
+    const response = await api.get<{ data: User }>('/users/profile/me', { 
       timeout: 5000
     });
     

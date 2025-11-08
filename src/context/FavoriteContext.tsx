@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '../services/api';
 import { useAuth } from './AuthContext';
 
 interface Destino {
@@ -55,9 +55,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const fetchFavorites = async () => {
     try {
-      const response = await axios.get<{ data: FavoritoCompleto[] }>('/api/favorites', {
-        withCredentials: true
-      });
+      const response = await api.get<{ data: FavoritoCompleto[] }>('/favorites');
       
       console.log('Respuesta de favoritos:', response.data);
 
@@ -74,7 +72,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const addFavorite = async (flightId: number) => {
     try {
-      await axios.post('/api/favorites', { flight_id: flightId }, { withCredentials: true });
+  await api.post('/favorites', { flight_id: flightId });
       // Recargar favoritos después de agregar
       await fetchFavorites();
     } catch (error: any) {
@@ -88,7 +86,7 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
   const removeFavorite = async (flightId: number) => {
     try {
-      await axios.delete(`/api/favorites/${flightId}`, { withCredentials: true });
+  await api.delete(`/favorites/${flightId}`);
       // Remover localmente
       setFavorites(prev => prev.filter(fav => fav.vuelo.id !== flightId));
     } catch (error) {
