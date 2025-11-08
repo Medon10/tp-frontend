@@ -1,7 +1,7 @@
 import './Home.css';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { ReservationModal } from '../../components/layout/ReservationModal';
 import { Notification } from '../../components/layout/Notification';
@@ -95,15 +95,15 @@ export const Home: React.FC = () => {
     setError('');
 
     try {
-      const response = await axios.post<ResultadosBusqueda>(
-        '/api/flights/buscar',
+      const response = await api.post<ResultadosBusqueda>(
+        '/flights/buscar',
         {
           presupuesto: Number(formData.presupuesto),
           personas: Number(formData.personas),
           origen: formData.origen,
           fecha_salida: formData.fecha_salida || undefined
         },
-        { withCredentials: true }
+        { }
       );
 
       console.log('✅ Respuesta recibida:', response.data); 
@@ -167,7 +167,9 @@ export const Home: React.FC = () => {
     if (imagen.startsWith('http://') || imagen.startsWith('https://')) {
       return imagen;
     }
-    return imagen;
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+    const backendOrigin = apiUrl.replace(/\/?api\/?$/, '');
+    return `${backendOrigin}${imagen}`;
   };
 
   return (

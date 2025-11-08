@@ -1,7 +1,7 @@
 import './DetalleDestino.css';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoriteContext';
 import { ReservationModal } from '../../components/layout/ReservationModal';
@@ -68,9 +68,9 @@ export const DetalleDestino: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-      const destinoResponse = await axios.get(`/api/destinies/${id}`);
+      const destinoResponse = await api.get(`/destinies/${id}`);
       setDestino(destinoResponse.data.data);
-      const vuelosResponse = await axios.get(`/api/flights/destino/${id}`);
+      const vuelosResponse = await api.get(`/flights/destino/${id}`);
       setVuelos(vuelosResponse.data.data || []);
     } catch (error: any) {
       console.error('Error al cargar datos:', error);
@@ -118,7 +118,10 @@ export const DetalleDestino: React.FC = () => {
   const formatearDuracion = (minutos: number): string => `${Math.floor(minutos / 60)}h ${minutos % 60}m`;
   const getImageUrl = (imagen: string | null | undefined): string => {
     if (!imagen) return `https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&h=400&fit=crop`;
-    return imagen.startsWith('http') ? imagen : imagen;
+    if (imagen.startsWith('http')) return imagen;
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+    const backendOrigin = apiUrl.replace(/\/?api\/?$/, '');
+    return `${backendOrigin}${imagen}`;
   };
 
 

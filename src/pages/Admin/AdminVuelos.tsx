@@ -1,6 +1,6 @@
 import './Admin.css';
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { api } from '../../services/api';
 import { FlightForm } from '../../ValidateFunctions/ValidateFlightForm';
 import { ConfirmationModal } from '../../components/layout/ConfirmationModal';
 import { Notification } from '../../components/layout/Notification';
@@ -50,9 +50,7 @@ export const AdminVuelos: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-      const response = await axios.get<{ data: Vuelo[] }>('/api/flights?populate=destino', { 
-        withCredentials: true 
-      });
+      const response = await api.get<{ data: Vuelo[] }>('/flights?populate=destino');
       
       console.log('Vuelos recibidos:', response.data.data);
       setVuelos(response.data.data || []);
@@ -101,9 +99,8 @@ export const AdminVuelos: React.FC = () => {
 
     setIsConfirmOpen(false);
     try {
-      const response = await axios.delete<ApiResponse>(
-        `/api/flights/${flightToDelete}`, 
-        { withCredentials: true }
+      const response = await api.delete<ApiResponse>(
+        `/flights/${flightToDelete}`
       );
       
       setNotification({ 
@@ -115,8 +112,8 @@ export const AdminVuelos: React.FC = () => {
     } catch (error) {
       console.error('Error al eliminar vuelo:', error);
       
-      if (axios.isAxiosError(error) && error.response) {
-        const errorMessage = (error.response.data as ApiResponse)?.message || 'Error al eliminar el vuelo.';
+      if ((error as any).response) {
+        const errorMessage = ((error as any).response.data as ApiResponse)?.message || 'Error al eliminar el vuelo.';
         setNotification({ message: errorMessage, type: 'error' });
       } else {
         setNotification({ message: 'Ocurrió un error inesperado.', type: 'error' });

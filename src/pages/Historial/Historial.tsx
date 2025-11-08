@@ -1,7 +1,7 @@
 import './Historial.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { ConfirmationModal } from '../../components/layout/ConfirmationModal';
 import { Notification } from '../../components/layout/Notification';
@@ -54,9 +54,7 @@ export const MisViajes: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-      const response = await axios.get<{ data: Reserva[] }>('/api/reservations/misviajes', {
-        withCredentials: true
-      });
+      const response = await api.get<{ data: Reserva[] }>('/reservations/misviajes');
       setReservas(response.data.data || []);
     } catch (error: any) {
       console.error('Error al cargar reservas:', error);
@@ -84,10 +82,9 @@ export const MisViajes: React.FC = () => {
     setShowConfirmModal(false);
     
     try {
-      const response = await axios.patch(
-        `/api/reservations/${reservationToCancel}/cancel`, 
-        {}, 
-        { withCredentials: true }
+      const response = await api.patch(
+        `/reservations/${reservationToCancel}/cancel`, 
+        {}
       );
       
       // Actualizar el estado local
@@ -162,7 +159,10 @@ export const MisViajes: React.FC = () => {
     if (!imagen) {
       return 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop';
     }
-    return imagen.startsWith('http') ? imagen : imagen;
+    if (imagen.startsWith('http')) return imagen;
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+    const backendOrigin = apiUrl.replace(/\/?api\/?$/, '');
+    return `${backendOrigin}${imagen}`;
   };
 
   const contadorProximos = reservas.filter(r => 

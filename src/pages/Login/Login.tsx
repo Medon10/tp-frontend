@@ -1,7 +1,7 @@
 import './Login.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { validateEmail } from '../../ValidateFunctions/ValidateFormMail';
 import { validatePassword } from '../../ValidateFunctions/ValidateFormPass';
@@ -100,7 +100,7 @@ export const Login: React.FC = () => {
 
 
     // Debug - ver qué se está enviando
-    console.log('Enviando a:', `http://localhost:3000/api/users/login`);
+  console.log('Enviando a:', `/users/login`);
     console.log('Datos a enviar:', {
       email: formData.email,
       password: formData.password
@@ -112,14 +112,13 @@ export const Login: React.FC = () => {
         message?: string;
       }
 
-      const response = await axios.post<LoginResponse>(
-        `api/users/login`,
+      const response = await api.post<LoginResponse>(
+        `/users/login`,
         {
           email: formData.email,
           password: formData.password
         },
         {
-          withCredentials: true,
           timeout: 5000,
           headers: {
             'Content-Type': 'application/json',

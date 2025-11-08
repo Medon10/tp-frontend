@@ -1,7 +1,7 @@
 import './Register.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { Notification } from '../../components/layout/Notification'; // <-- 1. IMPORTADO
 import { validateEmail } from '../../ValidateFunctions/ValidateFormMail';
@@ -84,15 +84,15 @@ export const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        `api/users/signup`, 
+      const response = await api.post(
+        `/users/signup`, 
         {
           nombre: formData.nombre.trim(),
           apellido: formData.apellido.trim(),
           email: formData.email,
           password: formData.password
         },
-        { withCredentials: true }
+        { }
       );
 
       // <-- 3. LÓGICA DE ÉXITO MODIFICADA -->

@@ -1,6 +1,6 @@
 import './ReservationModal.css';
 import React, { useState } from 'react';
-import axios from 'axios';
+import { api } from '../../services/api';
 
 interface Vuelo {
   id: number;
@@ -38,13 +38,13 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        '/api/reservations',
+      const response = await api.post(
+        '/reservations',
         {
           flight_id: flight.id,
           cantidad_personas: cantidadPersonas
         },
-        { withCredentials: true }
+        { }
       );
 
       console.log(' Reserva creada:', response.data);
