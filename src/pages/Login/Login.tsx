@@ -110,6 +110,7 @@ export const Login: React.FC = () => {
       interface LoginResponse {
         user?: UserData;
         message?: string;
+        token?: string;
       }
 
       const response = await api.post<LoginResponse>(
@@ -131,6 +132,12 @@ export const Login: React.FC = () => {
 
       if (response.status === 200 && response.data.user) {
         const userData = response.data.user!;
+        // Guardar token bearer como fallback si la cookie es bloqueada
+        if (response.data.token) {
+          try {
+            localStorage.setItem('auth_token', response.data.token);
+          } catch {}
+        }
         login(userData);
         console.log('Login exitoso:', userData);
       }

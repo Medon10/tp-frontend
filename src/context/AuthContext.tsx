@@ -16,6 +16,7 @@ type AuthContextType = {
   isAuthenticated: boolean;
   loading: boolean;
   updateUserContext: (updatedUser: User) => void;
+  token: string | null;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,9 +24,23 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider = ({ children }: { children: ReactElement }) => {
   const [user, setUser] = useState<User | null>(null); 
   const [loading, setLoading] = useState<boolean>(true); 
+  const [token, setToken] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('auth_token');
+    } catch {
+      return null;
+    }
+  });
 
   const login = (userData: User) => {
     setUser(userData);
+    try {
+      const saved = localStorage.getItem('auth_token');
+      if (saved) {
+        setToken(saved);
+        api.defaults.headers.common['Authorization'] = `Bearer ${saved}`;
+      }
+    } catch {}
   };
 
   const logout = async () => {
@@ -36,6 +51,8 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
       console.error('Error en logout:', error);
     } finally {
       setUser(null);
+      setToken(null);
+      localStorage.removeItem('auth_token');
     }
   };
 
@@ -48,6 +65,11 @@ const checkAuth = async () => {
     
     if (response.status === 200 && response.data?.data) {
       setUser(response.data.data);
+    } else {
+      // Si falla la cookie pero tenemos token almacenado, intentar obtener perfil usando bearer
+      if (!response.data?.data && !user && token) {
+        // Perfil ya intentado, nada más
+      }
     }
   } catch (error: any) {
     // Silenciar error 401 (no autenticado es normal)
@@ -69,6 +91,12 @@ const updateUserContext = (updatedUser: User) => {
   // Verificar autenticación al cargar
   useEffect(() => {
     checkAuth();
+    // Al montar, si hay token, configurar header Authorization
+    if (token) {
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+    } else {
+      delete api.defaults.headers.common['Authorization'];
+    }
   }, []);
 
   const value: AuthContextType = {
@@ -77,7 +105,8 @@ const updateUserContext = (updatedUser: User) => {
     logout,
     isAuthenticated: user !== null,
     loading,
-    updateUserContext
+    updateUserContext,
+    token
   };
 
   return (
