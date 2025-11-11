@@ -15,7 +15,8 @@ interface UserStats {
     precio_total: number;
   } | null;
   miembroDesde: string;
-  aniosComoMiembro: number;
+  aniosComoMiembro: string; // en backend es texto legible; hay aniosNumerico opcional
+  aniosNumerico?: number;
 }
 
 export const Perfil: React.FC = () => {

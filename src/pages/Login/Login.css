@@ -1,15 +1,44 @@
-/* Error Message - Móvil */
+/* Login.css - Mobile First */
+
+/* Container wrapper for layout */
+.login-page {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 1.25rem 1rem 2.5rem;
+}
+
+.login-page .hero {
+  padding: 1.5rem 0 1rem;
+}
+
+.login-page .hero h1 {
+  font-size: 1.7rem;
+  margin-bottom: .65rem;
+}
+
+.login-page .hero p { font-size: .95rem; }
+
+/* Form wrapper */
+.login-form-wrapper {
+  background: #ffffff;
+  border-radius: 14px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.08);
+  padding: 1.25rem 1rem 1.5rem;
+}
+
+/* Error Message - Mobile */
 .error-message {
   background: #ffe6e6;
   border: 1px solid #ff4444;
   color: #cc0000;
-  padding: 0.75rem; 
+  padding: 0.65rem; 
   border-radius: 6px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
   display: flex;
   align-items: flex-start;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 .error-message i {
@@ -24,13 +53,13 @@
   background: #d4edda;
   border: 1px solid #28a745;
   color: #155724;
-  padding: 0.75rem;
+  padding: 0.65rem;
   border-radius: 6px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.9rem;
   display: flex;
   align-items: flex-start;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: 0.8rem;
+  line-height: 1.35;
 }
 
 .success-message i {
@@ -66,7 +95,7 @@
 }
 
 .auth-redirect p {
-  font-size: 0.85rem; 
+  font-size: 0.8rem; 
   text-align: center;
 }
 
@@ -122,9 +151,31 @@
 }
 
 .toggle-password i {
-  font-size: 1.1rem;
+  font-size: 1rem;
 }
 
-input.error + .toggle-password {
-  color: #ff6b6b;
+input.error + .toggle-password { color: #ff6b6b; }
+
+/* Tablet */
+@media (min-width: 768px) {
+  .login-page { max-width: 560px; padding: 2rem 1.5rem 3rem; }
+  .login-page .hero h1 { font-size: 2rem; }
+  .login-page .hero p { font-size: 1rem; }
+  .login-form-wrapper { padding: 1.75rem 1.5rem 2rem; }
+  .error-message, .success-message { font-size: .85rem; padding: .7rem .75rem; }
+  .auth-redirect p { font-size: .85rem; }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  .login-page { max-width: 640px; padding: 2.25rem 1.75rem 3.5rem; }
+  .login-page .hero h1 { font-size: 2.2rem; }
+  .login-page .hero p { font-size: 1.05rem; }
+  .login-form-wrapper { padding: 2rem 2rem 2.25rem; }
+}
+
+/* XL */
+@media (min-width: 1440px) {
+  .login-page { max-width: 680px; }
+  .login-page .hero h1 { font-size: 2.3rem; }
 }

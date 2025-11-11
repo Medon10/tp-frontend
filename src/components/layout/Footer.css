@@ -1,59 +1,46 @@
-/* Footer */
+/* Footer - Mobile First */
 footer {
   background: var(--dark);
   color: white;
-  padding: 3rem 0;
-  margin-top: 4rem;
+  padding: 2rem 0; /* mobile compact */
+  margin-top: 2.5rem;
 }
 
 .footer-content {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
+  grid-template-columns: 1fr; /* mobile: single column */
+  gap: 1.25rem;
 }
 
 .footer-section h3 {
-  margin-bottom: 1.5rem;
-  font-size: 1.2rem;
+  margin-bottom: 1rem;
+  font-size: 1rem;
 }
 
-.footer-section ul {
-  list-style: none;
-}
-
-.footer-section ul li {
-  margin-bottom: 0.8rem;
-}
-
-.footer-section ul li a {
-  color: #ddd;
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-.footer-section ul li a:hover {
-  color: var(--primary);
-}
+.footer-section ul { list-style: none; padding: 0; }
+.footer-section ul li { margin-bottom: 0.6rem; }
+.footer-section ul li a { color: #ddd; text-decoration: none; transition: color 0.3s; }
+.footer-section ul li a:hover { color: var(--primary); }
 
 .copyright {
   text-align: center;
-  margin-top: 2rem;
-  padding-top: 2rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   color: #aaa;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 /* Banner */
 .banner {
   display: none;
   position: fixed;
-  bottom: 20px;
-  right: 20px;
+  bottom: 16px;
+  right: 16px;
   background: var(--success);
   color: white;
-  padding: 1rem;
-  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   animation: slideIn 0.3s ease-out;
   z-index: 1000;
@@ -64,25 +51,17 @@ footer {
   to { transform: translateY(0); opacity: 1; }
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .container {
-    padding: 0 1rem;
-  }
-  
-  .hero h1 {
-    font-size: 2rem;
-  }
-  
-  .hero p {
-    font-size: 1rem;
-  }
-  
-  .budget-form {
-    padding: 1.5rem;
-  }
-  
-  .footer-content {
-    grid-template-columns: 1fr;
-  }
+/* Tablet */
+@media (min-width: 768px) {
+  footer { padding: 2.5rem 0; margin-top: 3rem; }
+  .footer-content { grid-template-columns: repeat(2, 1fr); gap: 1.75rem; }
+  .footer-section h3 { font-size: 1.1rem; }
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+  footer { padding: 3rem 0; margin-top: 4rem; }
+  .footer-content { grid-template-columns: repeat(3, minmax(200px, 1fr)); gap: 2rem; }
+  .footer-section h3 { font-size: 1.2rem; }
+  .copyright { font-size: 0.9rem; }
 }

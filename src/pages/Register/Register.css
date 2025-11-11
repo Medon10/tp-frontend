@@ -4,10 +4,11 @@
 /* Estilos específicos para Register */
 
 /* Form row para campos lado a lado */
+/* Mobile-first: single column */
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  grid-template-columns: 1fr; /* mobile */
+  gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
@@ -139,32 +140,16 @@
 }
 
 /* Responsive adjustments */
-@media (max-width: 768px) {
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 0.5rem;
-  }
-  
-  .form-terms p {
-    font-size: 0.8rem;
-  }
+/* Tablet and up: two columns */
+@media (min-width: 768px) {
+  .form-row { grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .form-terms p { font-size: 0.85rem; }
 }
 
 @media (max-width: 480px) {
-  .social-login {
-    gap: 0.6rem;
-  }
-  
-  .btn-google,
-  .btn-facebook {
-    font-size: 0.9rem;
-    padding: 0.7rem 1rem;
-  }
-  
-  .form-terms {
-    margin-top: 0.8rem;
-    padding-top: 0.8rem;
-  }
+  .social-login { gap: 0.6rem; }
+  .btn-google, .btn-facebook { font-size: 0.9rem; padding: 0.7rem 1rem; }
+  .form-terms { margin-top: 0.8rem; padding-top: 0.8rem; }
 }
 
 /* Estados de hover mejorados para register */

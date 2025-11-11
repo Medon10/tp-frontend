@@ -91,7 +91,7 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
       if (vueloAEditar) {
         // Edición
         await api.put(
-          `/api/flights/${vueloAEditar.id}`, 
+          `/flights/${vueloAEditar.id}`, 
           flightData, 
           { withCredentials: true }
         );
@@ -99,7 +99,7 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
       } else {
         // Creación
         await api.post(
-          '/api/flights', 
+          '/flights', 
           flightData, 
           { withCredentials: true }
         );
