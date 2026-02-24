@@ -1,69 +1,84 @@
-# React + TypeScript + Vite
+# VacationMatch — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interfaz de usuario de la plataforma VacationMatch, desarrollada con **React 19**, **TypeScript**, **Vite 7** y **React Router 7**.
 
-Currently, two official plugins are available:
+## Inicio Rápido
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install        # Instalar dependencias
+npm run dev        # Iniciar en modo desarrollo (puerto 5173)
+npm run build      # Compilar para producción
+npm run preview    # Previsualizar build de producción
+npm run lint       # Ejecutar ESLint
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+> **Importante:** El backend debe estar corriendo antes de iniciar el frontend.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Configuración
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Crear un archivo `.env` en la raíz (opcional):
+
+```env
+VITE_API_URL=http://localhost:3000/api
 ```
+
+Si no se crea, el frontend usa `http://localhost:3000/api` por defecto. En producción, configurar con la URL pública del backend.
+
+## Estructura
+
+```
+src/
+├── App.tsx               # Router principal y layout
+├── pages/                # Páginas de la aplicación
+│   ├── Home/             # Búsqueda de vuelos por presupuesto
+│   ├── Login/            # Inicio de sesión
+│   ├── Register/         # Registro de usuario
+│   ├── Destinos/         # Listado de destinos turísticos
+│   ├── DetalleDestino/   # Detalle de destino con vuelos disponibles
+│   ├── Favoritos/        # Vuelos guardados como favoritos
+│   ├── Historial/        # Mis viajes (reservas por estado)
+│   ├── Perfil/           # Perfil del usuario con estadísticas
+│   ├── Admin/            # Panel admin (CRUD vuelos)
+│   └── Unauthorized/     # Página de acceso denegado
+├── components/layout/    # Componentes reutilizables (Header, Footer, Modales)
+├── context/              # Estado global (AuthContext, FavoriteContext)
+├── routes/               # Guards de rutas (ProtectedRoute, AdminRoute)
+├── services/             # Instancia Axios centralizada
+└── ValidateFunctions/    # Validaciones de formularios
+```
+
+## Tecnologías
+
+| Tecnología | Uso |
+|-----------|-----|
+| React 19 | Framework de UI |
+| TypeScript | Tipado estático |
+| Vite 7 | Build tool y dev server |
+| React Router 7 | Navegación SPA |
+| Axios | Comunicación con la API |
+| CSS Custom Properties | Estilos y temas |
+| Font Awesome (CDN) | Iconografía |
+
+## Funcionalidades
+
+- **Búsqueda inteligente** de vuelos por presupuesto, personas y origen
+- **Autenticación** con JWT (cookie httpOnly + Bearer token)
+- **Dos niveles de acceso:** usuario y administrador
+- **Rutas protegidas** con guards (`ProtectedRoute`, `AdminRoute`)
+- **Favoritos** con estado global vía Context API
+- **Reservas** con integración de pagos (Mercado Pago)
+- **Panel de administración** para gestión de vuelos
+- **Responsive design** con breakpoints SM, MD, LG
+
+## Deploy
+
+El frontend se puede deployar en cualquier servicio de hosting estático:
+- [Netlify](https://netlify.com) · [Cloudflare Pages](https://pages.cloudflare.com) · [Vercel](https://vercel.com)
+
+Al deployar, asegurate de configurar la variable de entorno `VITE_API_URL` con la URL pública del backend.
+
+## Documentación del Proyecto
+
+- [README principal del proyecto](https://github.com/Medon10/tp-backend#readme) — Instalación completa, stack, estructura
+- [Documentación de la API](https://github.com/Medon10/tp-backend/blob/main/docs/api.md) — Todos los endpoints
+- [Propuesta del TP](https://github.com/Medon10/tp-backend/blob/main/docs/proposal.md) — Alcance y definición
