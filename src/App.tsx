@@ -14,6 +14,7 @@ import { Favoritos } from './pages/Favoritos/Favoritos.tsx';
 import { MisViajes } from './pages/Historial/Historial.tsx';
 import { AdminVuelos } from './pages/Admin/AdminVuelos.tsx';
 import { Unauthorized } from './pages/Unauthorized/Unauthorized.tsx';
+import { PagoResultado } from './pages/PagoResultado/PagoResultado.tsx';
 import { AdminRoute } from './routes/AdminRoute.tsx';
 
 
@@ -36,6 +37,7 @@ export default function App() {
           <Route path="/destinos" element={<Destinos />} />
           <Route path="/destinos/:id" element={<DetalleDestino />} />
           <Route path ="/unauthorized" element={<Unauthorized />} />
+          <Route path="/pago/resultado" element={<PagoResultado />} />
 
           {/* Rutas Protegidas (requieren iniciar sesión o admin) */}
           <Route path="/perfil" element={<ProtectedRoute><Perfil /></ProtectedRoute>} />

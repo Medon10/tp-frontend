@@ -40,7 +40,6 @@ export const MisViajes: React.FC = () => {
       const response = await api.get<{ data: Reserva[] }>('/reservations/misviajes');
       setReservas(response.data.data || []);
     } catch (error: any) {
-      console.error('Error al cargar reservas:', error);
       if (error.response?.status === 401) {
         navigate('/login');
       } else {
@@ -86,7 +85,6 @@ export const MisViajes: React.FC = () => {
       });
       
     } catch (error: any) {
-      console.error('Error al cancelar reserva:', error);
       const errorMessage = error.response?.data?.message || 'Error al cancelar la reserva';
       setNotification({ message: errorMessage, type: 'error' });
     } finally {
@@ -102,9 +100,12 @@ export const MisViajes: React.FC = () => {
       const resp = await api.post('/payments/create-preference', { reservationId: reserva.id });
       const initPoint = resp.data?.data?.init_point;
       if (!initPoint) throw new Error('No se obtuvo init_point');
-      window.location.href = initPoint; // redirige al checkout
+      window.open(initPoint, '_blank'); // abre checkout en nueva pestaña
+      setNotification({
+        message: 'Se abrió Mercado Pago en una nueva pestaña. Completá el pago allí.',
+        type: 'success'
+      });
     } catch (error: any) {
-      console.error('Error al reintentar pago:', error?.response?.data || error);
       setNotification({
         message: error?.response?.data?.message || 'Error al reintentar pago',
         type: 'error'

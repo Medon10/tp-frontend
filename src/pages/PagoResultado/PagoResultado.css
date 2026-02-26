@@ -1,0 +1,125 @@
+/* PagoResultado.css — Mobile-first */
+
+.pago-resultado-page {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background: #f7f9fc;
+}
+
+.resultado-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2.5rem 1.5rem;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.resultado-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 2rem;
+}
+
+.resultado-icon.success {
+  background: rgba(0, 200, 83, 0.1);
+  color: #00c853;
+}
+
+.resultado-icon.failure {
+  background: rgba(255, 68, 68, 0.1);
+  color: #ff4444;
+}
+
+.resultado-icon.pending {
+  background: rgba(255, 171, 0, 0.1);
+  color: #ffab00;
+}
+
+.resultado-card h1 {
+  font-size: 1.5rem;
+  color: var(--dark, #1a1a2e);
+  margin-bottom: 0.75rem;
+}
+
+.resultado-card p {
+  color: #666;
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.resultado-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.resultado-actions .btn {
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  border: none;
+  font-size: 1rem;
+}
+
+.resultado-actions .btn-primary {
+  background: linear-gradient(135deg, var(--primary, #3a86ff), var(--secondary, #8338ec));
+  color: white;
+}
+
+.resultado-actions .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
+}
+
+.resultado-actions .btn-outline {
+  background: transparent;
+  border: 2px solid var(--primary, #3a86ff);
+  color: var(--primary, #3a86ff);
+}
+
+.resultado-actions .btn-outline:hover {
+  background: rgba(58, 134, 255, 0.1);
+}
+
+@media (min-width: 768px) {
+  .resultado-card {
+    padding: 3rem 2.5rem;
+  }
+
+  .resultado-icon {
+    width: 80px;
+    height: 80px;
+    font-size: 2.5rem;
+  }
+
+  .resultado-card h1 {
+    font-size: 1.8rem;
+  }
+
+  .resultado-card p {
+    font-size: 1.05rem;
+  }
+
+  .resultado-actions {
+    flex-direction: row;
+    justify-content: center;
+  }
+}

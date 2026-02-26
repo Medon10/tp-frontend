@@ -30,6 +30,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
   const [cantidadPersonas, setCantidadPersonas] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [paymentStarted, setPaymentStarted] = useState(false);
 
   const precioTotal = (flight.precio_por_persona ?? 0) * cantidadPersonas;
 
@@ -49,8 +50,6 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
         throw new Error('No se obtuvo ID de la reserva');
       }
 
-      console.log(' Reserva creada:', reservationId);
-
       // 2. Crear preferencia de pago Mercado Pago
       const prefResp = await api.post('/payments/create-preference', {
         reservationId
@@ -61,10 +60,10 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
         throw new Error('No se obtuvo init_point de Mercado Pago');
       }
 
-  // 3. Redirigir al checkout (no mostramos notificación aquí)
-  window.location.href = initPoint;
+      // 3. Abrir checkout en nueva pestaña y mostrar feedback
+      window.open(initPoint, '_blank');
+      setPaymentStarted(true);
     } catch (error: any) {
-      console.error(' Error al reservar:', error?.response?.data || error);
       setError(
         error?.response?.data?.detail ||
         error?.response?.data?.message ||
@@ -76,6 +75,41 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
   };
 
   if (!isOpen) return null;
+
+  // Si ya se abrió MP en otra pestaña, mostrar mensaje de feedback
+  if (paymentStarted) {
+    return (
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+          <button className="modal-close" onClick={onClose}>
+            <i className="fas fa-times"></i>
+          </button>
+
+          <div className="modal-header">
+            <i className="fas fa-external-link-alt modal-icon" style={{ color: 'var(--primary, #3a86ff)' }}></i>
+            <h2>Completá el pago</h2>
+          </div>
+
+          <div className="modal-body" style={{ textAlign: 'center' }}>
+            <p style={{ fontSize: '1.05rem', color: '#666', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+              Se abrió <strong>Mercado Pago</strong> en una nueva pestaña.
+              Completá el pago allí y luego volvé a esta página.
+            </p>
+            <p style={{ fontSize: '0.9rem', color: '#999' }}>
+              Podés ver el estado de tu reserva en <strong>"Mis Viajes"</strong>.
+            </p>
+          </div>
+
+          <div className="modal-footer">
+            <button className="btn" onClick={onClose}>
+              <i className="fas fa-check"></i>
+              Entendido
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="modal-overlay" onClick={onClose}>
