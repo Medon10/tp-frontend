@@ -4,40 +4,14 @@ import { api } from '../../services/api';
 import { FlightForm } from '../../ValidateFunctions/ValidateFlightForm';
 import { ConfirmationModal } from '../../components/layout/ConfirmationModal';
 import { Notification } from '../../components/layout/Notification';
-
-interface Destino {
-  id: number;
-  nombre: string;
-  imagen?: string;
-  transporte?: string[];
-  actividades?: string[];
-}
-
-interface Vuelo {
-  id: number;
-  aerolinea: string;
-  origen: string;
-  fechahora_salida: string;
-  fechahora_llegada: string;
-  duracion: number;
-  cantidad_asientos: number;
-  montoVuelo: number;
-  distancia_km?: number;
-  capacidad_restante?: number;
-  destino?: Destino;
-  destino_id?: number;
-}
-
-interface ApiResponse {
-  message: string;
-}
+import type { VueloAdmin, ApiResponse } from '../../types';
 
 export const AdminVuelos: React.FC = () => {
-  const [vuelos, setVuelos] = useState<Vuelo[]>([]);
+  const [vuelos, setVuelos] = useState<VueloAdmin[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [vueloSeleccionado, setVueloSeleccionado] = useState<Vuelo | null>(null);
+  const [vueloSeleccionado, setVueloSeleccionado] = useState<VueloAdmin | null>(null);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [flightToDelete, setFlightToDelete] = useState<number | null>(null);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
@@ -50,12 +24,10 @@ export const AdminVuelos: React.FC = () => {
     setIsLoading(true);
     setError('');
     try {
-      const response = await api.get<{ data: Vuelo[] }>('/flights?populate=destino');
+      const response = await api.get<{ data: VueloAdmin[] }>('/flights?populate=destino');
       
-      console.log('Vuelos recibidos:', response.data.data);
       setVuelos(response.data.data || []);
     } catch (err) {
-      console.error('Error al cargar vuelos:', err);
       setError('No se pudieron cargar los vuelos.');
       setNotification({ 
         message: 'Error al cargar los vuelos', 
@@ -71,7 +43,7 @@ export const AdminVuelos: React.FC = () => {
     setIsFormOpen(true);
   };
 
-  const handleOpenFormParaEditar = (vuelo: Vuelo) => {
+  const handleOpenFormParaEditar = (vuelo: VueloAdmin) => {
     setVueloSeleccionado(vuelo);
     setIsFormOpen(true);
   };

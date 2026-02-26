@@ -1,58 +1,75 @@
 import './ReservationModal.css';
 import React, { useState } from 'react';
 import { api } from '../../services/api';
+import type { Destino } from '../../types';
 
-interface Vuelo {
+/** Datos mínimos que el modal necesita del vuelo.
+ *  Es compatible tanto con Vuelo (desde DetalleDestino)
+ *  como con VueloBusqueda adaptado (desde Home). */
+interface ReservationFlightData {
   id: number;
   origen: string;
-  destino: {
-    id: number;
-    nombre: string;
-  };
+  destino: Pick<Destino, 'nombre'>;
   fechahora_salida: string;
-  precio_por_persona: number;
+  precio_por_persona?: number;
   capacidad_restante: number;
 }
 
 interface ReservationModalProps {
-  flight: Vuelo;
+  flight: ReservationFlightData;
   isOpen: boolean;
   onClose: () => void;
-  onSuccess: () => void;
+  onSuccess: () => void; // mantenemos la prop para compatibilidad pero no la usamos aquí
 }
 
 export const ReservationModal: React.FC<ReservationModalProps> = ({
   flight,
   isOpen,
-  onClose,
-  onSuccess
+  onClose
 }) => {
   const [cantidadPersonas, setCantidadPersonas] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const precioTotal = flight.precio_por_persona * cantidadPersonas;
+  const precioTotal = (flight.precio_por_persona ?? 0) * cantidadPersonas;
 
   const handleReservar = async () => {
     setError('');
     setIsLoading(true);
 
     try {
-      const response = await api.post(
-        '/reservations',
-        {
-          flight_id: flight.id,
-          cantidad_personas: cantidadPersonas
-        },
-        { }
-      );
+      // 1. Crear la reserva
+      const reservaResp = await api.post('/reservations', {
+        flight_id: flight.id,
+        cantidad_personas: cantidadPersonas
+      });
 
-      console.log(' Reserva creada:', response.data);
-      onSuccess();
-      onClose();
+      const reservationId = reservaResp.data?.data?.id;
+      if (!reservationId) {
+        throw new Error('No se obtuvo ID de la reserva');
+      }
+
+      console.log(' Reserva creada:', reservationId);
+
+      // 2. Crear preferencia de pago Mercado Pago
+      const prefResp = await api.post('/payments/create-preference', {
+        reservationId
+      });
+
+      const initPoint = prefResp.data?.data?.init_point;
+      if (!initPoint) {
+        throw new Error('No se obtuvo init_point de Mercado Pago');
+      }
+
+  // 3. Redirigir al checkout (no mostramos notificación aquí)
+  window.location.href = initPoint;
     } catch (error: any) {
-      console.error(' Error al reservar:', error);
-      setError(error.response?.data?.message || 'Error al crear la reserva');
+      console.error(' Error al reservar:', error?.response?.data || error);
+      setError(
+        error?.response?.data?.detail ||
+        error?.response?.data?.message ||
+        'Error al crear la reserva'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -154,7 +171,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
           <div className="price-summary">
             <div className="price-row">
               <span>Precio por persona:</span>
-              <span>${flight.precio_por_persona.toLocaleString('es-AR')} USD</span>
+              <span>${(flight.precio_por_persona ?? 0).toLocaleString('es-AR')} USD</span>
             </div>
             <div className="price-row">
               <span>Cantidad de personas:</span>

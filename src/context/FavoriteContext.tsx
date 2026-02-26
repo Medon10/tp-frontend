@@ -1,33 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useAuth } from './AuthContext';
-
-interface Destino {
-  id: number;
-  nombre: string;
-  imagen: string;
-  transporte: string[];
-  actividades: string[];
-}
-
-interface Vuelo {
-  id: number;
-  origen: string;
-  destino: Destino;
-  fechahora_salida: string;
-  fechahora_llegada: string;
-  duracion: number;
-  aerolinea: string;
-  capacidad_restante: number;
-  precio_por_persona: number;
-  distancia_aproximada: number;
-}
-
-interface FavoritoCompleto {
-  id: number;
-  fecha_guardado: string;
-  vuelo: Vuelo;
-}
+import type { FavoritoCompleto } from '../types';
 
 interface FavoritesContextType {
   favorites: FavoritoCompleto[]; // Ahora guarda objetos completos

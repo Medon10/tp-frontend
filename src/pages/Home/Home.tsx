@@ -5,34 +5,7 @@ import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { ReservationModal } from '../../components/layout/ReservationModal';
 import { Notification } from '../../components/layout/Notification';
-
-interface Vuelo {
-  id: number;
-  origen: string;
-  destino: {
-    id: number;
-    nombre: string;
-    imagen: string;
-    transporte: string[];
-    actividades: string[];
-  };
-  fecha_hora: string;
-  fechahora_salida: string; 
-  capacidad_restante: number;
-  precio_por_persona: number;
-  precio_total: number;
-  personas: number;
-  distancia_aproximada: number;
-}
-
-interface ResultadosBusqueda {
-  message: string;
-  resultados: number;
-  presupuesto_maximo: number;
-  personas: number;
-  origen: string;
-  data: Vuelo[];
-}
+import type { VueloBusqueda, ResultadosBusqueda } from '../../types';
 
 export const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -51,7 +24,14 @@ export const Home: React.FC = () => {
 
   //  Estados para el modal y notificación
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedFlight, setSelectedFlight] = useState<Vuelo | null>(null);
+  const [selectedFlight, setSelectedFlight] = useState<{
+    id: number;
+    origen: string;
+    destino: { nombre: string };
+    fechahora_salida: string;
+    precio_por_persona: number;
+    capacidad_restante: number;
+  } | null>(null);
   const [notification, setNotification] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   const ciudadesOrigen = [
@@ -106,12 +86,8 @@ export const Home: React.FC = () => {
         { }
       );
 
-      console.log('✅ Respuesta recibida:', response.data); 
-      console.log('📊 Cantidad de resultados:', response.data.data?.length);
-
       setResultados(response.data);
     } catch (error: any) {
-      console.error('❌ Error al buscar vuelos:', error);
       setError(error.response?.data?.message || 'Error al buscar vuelos. Intenta de nuevo.');
       setResultados(null);
     } finally {
@@ -120,7 +96,7 @@ export const Home: React.FC = () => {
   };
 
   //  Función para abrir el modal de reserva
-  const handleReservarClick = (vuelo: Vuelo) => {
+  const handleReservarClick = (vuelo: VueloBusqueda) => {
     if (!isAuthenticated) {
       setNotification({ message: 'Debes iniciar sesión para reservar. Redirigiendo...', type: 'error' });
       setTimeout(() => navigate('/login'), 2000);

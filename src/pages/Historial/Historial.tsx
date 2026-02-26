@@ -5,27 +5,9 @@ import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { ConfirmationModal } from '../../components/layout/ConfirmationModal';
 import { Notification } from '../../components/layout/Notification';
+import type { Reserva } from '../../types';
 
-interface Reserva {
-  id: number;
-  fecha_reserva: string;
-  valor_reserva: number;
-  estado: 'confirmado' | 'cancelado' | 'completado';
-  flight: {
-    id: number;
-    origen: string;
-    fechahora_salida: string;
-    fechahora_llegada: string;
-    aerolinea: string;
-    destino: {
-      id: number;
-      nombre: string;
-      imagen: string;
-    };
-  };
-}
-
-type TabType = 'proximos' | 'pasados' | 'cancelados';
+type TabType = 'pendientes' | 'proximos' | 'pasados' | 'cancelados';
 
 export const MisViajes: React.FC = () => {
   const [reservas, setReservas] = useState<Reserva[]>([]);
@@ -33,6 +15,7 @@ export const MisViajes: React.FC = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState<TabType>('proximos');
   const [cancelingId, setCancelingId] = useState<number | null>(null);
+  const [paymentRetryingId, setPaymentRetryingId] = useState<number | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [reservationToCancel, setReservationToCancel] = useState<number | null>(null);
   const [notification, setNotification] = useState<{ message: string, type: 'success' | 'error' } | null>(null);
@@ -112,6 +95,25 @@ export const MisViajes: React.FC = () => {
     }
   };
 
+  const retryPayment = async (reserva: Reserva) => {
+    if (reserva.estado !== 'pendiente') return;
+    setPaymentRetryingId(reserva.id);
+    try {
+      const resp = await api.post('/payments/create-preference', { reservationId: reserva.id });
+      const initPoint = resp.data?.data?.init_point;
+      if (!initPoint) throw new Error('No se obtuvo init_point');
+      window.location.href = initPoint; // redirige al checkout
+    } catch (error: any) {
+      console.error('Error al reintentar pago:', error?.response?.data || error);
+      setNotification({
+        message: error?.response?.data?.message || 'Error al reintentar pago',
+        type: 'error'
+      });
+    } finally {
+      setPaymentRetryingId(null);
+    }
+  };
+
   const cancelModal = () => {
     setShowConfirmModal(false);
     setReservationToCancel(null);
@@ -120,7 +122,7 @@ export const MisViajes: React.FC = () => {
   const esVueloPasado = (fechaSalida: string): boolean => new Date(fechaSalida) < new Date();
   
   const puedeCancelar = (reserva: Reserva): boolean => 
-    reserva.estado === 'confirmado' && !esVueloPasado(reserva.flight.fechahora_salida);
+    (reserva.estado === 'pendiente' || reserva.estado === 'confirmado') && !esVueloPasado(reserva.flight.fechahora_salida);
   
   const formatearFecha = (fecha: string): string => 
     new Date(fecha).toLocaleDateString('es-AR', { 
@@ -143,6 +145,8 @@ export const MisViajes: React.FC = () => {
   const reservasFiltradas = reservas.filter(reserva => {
     const vueloPasado = esVueloPasado(reserva.flight.fechahora_salida);
     switch (activeTab) {
+      case 'pendientes':
+        return reserva.estado === 'pendiente';
       case 'proximos': 
         return reserva.estado === 'confirmado' && !vueloPasado;
       case 'pasados': 
@@ -165,6 +169,7 @@ export const MisViajes: React.FC = () => {
     return `${backendOrigin}${imagen}`;
   };
 
+  const contadorPendientes = reservas.filter(r => r.estado === 'pendiente').length;
   const contadorProximos = reservas.filter(r => 
     r.estado === 'confirmado' && !esVueloPasado(r.flight.fechahora_salida)
   ).length;
@@ -251,6 +256,14 @@ export const MisViajes: React.FC = () => {
               Cancelados 
               <span className="tab-count">{contadorCancelados}</span>
             </button>
+            <button 
+              className={`tab ${activeTab === 'pendientes' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('pendientes')}
+            >
+              <i className="fas fa-hourglass-half"></i>
+              Pendientes
+              <span className="tab-count">{contadorPendientes}</span>
+            </button>
           </div>
           
           {reservasFiltradas.length === 0 ? (
@@ -258,6 +271,7 @@ export const MisViajes: React.FC = () => {
               <i className="fas fa-suitcase-rolling"></i>
               <h3>No tienes viajes en esta categoría</h3>
               <p>
+                {activeTab === 'pendientes' && 'No tienes reservas pendientes de pago'}
                 {activeTab === 'proximos' && 'Explora destinos y reserva tu próximo viaje'}
                 {activeTab === 'pasados' && 'Aún no has completado ningún viaje'}
                 {activeTab === 'cancelados' && 'No tienes reservas canceladas'}
@@ -324,6 +338,15 @@ export const MisViajes: React.FC = () => {
                           </span>
                         </div>
                       </div>
+                      {typeof reserva.cantidad_personas === 'number' && (
+                        <div className="detalle-item">
+                          <i className="fas fa-users"></i>
+                          <div>
+                            <span className="detalle-label">Personas</span>
+                            <span className="detalle-valor">{reserva.cantidad_personas}</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     
                     <div className="reserva-actions">
@@ -334,6 +357,25 @@ export const MisViajes: React.FC = () => {
                         Ver destino
                       </button>
                       
+                      {reserva.estado === 'pendiente' && (
+                        <button
+                          className="btn btn-outline"
+                          onClick={() => retryPayment(reserva)}
+                          disabled={paymentRetryingId === reserva.id}
+                        >
+                          {paymentRetryingId === reserva.id ? (
+                            <>
+                              <i className="fas fa-spinner fa-spin"></i>
+                              Generando...
+                            </>
+                          ) : (
+                            <>
+                              <i className="fas fa-credit-card"></i>
+                              Pagar ahora
+                            </>
+                          )}
+                        </button>
+                      )}
                       {puedeCancelar(reserva) && (
                         <button 
                           className="btn btn-danger" 
@@ -348,7 +390,7 @@ export const MisViajes: React.FC = () => {
                           ) : (
                             <>
                               <i className="fas fa-times"></i> 
-                              Cancelar
+                              {reserva.estado === 'pendiente' ? 'Cancelar pendiente' : 'Cancelar'}
                             </>
                           )}
                         </button>

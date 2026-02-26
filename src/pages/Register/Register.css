@@ -140,16 +140,18 @@
 }
 
 /* Responsive adjustments */
-/* Tablet and up: two columns */
+/* Base mobile: single column, smaller sizes */
+.social-login { gap: 0.6rem; }
+.btn-google, .btn-facebook { font-size: 0.9rem; padding: 0.7rem 1rem; }
+.form-terms { margin-top: 0.8rem; padding-top: 0.8rem; }
+
+/* Tablet and up: two columns, larger sizes */
 @media (min-width: 768px) {
   .form-row { grid-template-columns: 1fr 1fr; gap: 1rem; }
   .form-terms p { font-size: 0.85rem; }
-}
-
-@media (max-width: 480px) {
-  .social-login { gap: 0.6rem; }
-  .btn-google, .btn-facebook { font-size: 0.9rem; padding: 0.7rem 1rem; }
-  .form-terms { margin-top: 0.8rem; padding-top: 0.8rem; }
+  .social-login { gap: inherit; }
+  .btn-google, .btn-facebook { font-size: inherit; padding: inherit; }
+  .form-terms { margin-top: inherit; padding-top: inherit; }
 }
 
 /* Estados de hover mejorados para register */

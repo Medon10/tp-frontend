@@ -69,9 +69,9 @@ nav {
   font-size: 1.5rem;
 }
 
+/* Base: mobile — nav links hidden, smaller typography */
 .nav-links {
-  display: flex;
-  gap: 2rem;
+  display: none;
 }
 
 .nav-links a {
@@ -93,7 +93,7 @@ nav {
 }
 
 .hero h1 {
-  font-size: 2.5rem;
+  font-size: 2rem;
   margin-bottom: 1rem;
   background: linear-gradient(to right, var(--primary), var(--accent));
   -webkit-background-clip: text;
@@ -102,7 +102,7 @@ nav {
 }
 
 .hero p {
-  font-size: 1.2rem;
+  font-size: 1rem;
   color: #555;
   margin-bottom: 2rem;
 }
@@ -360,8 +360,9 @@ nav {
   to { transform: translateY(0); opacity: 1; }
 }
 
-@media (max-width: 768px) {
-  .nav-links { display: none; }
-  .hero h1 { font-size: 2rem; }
-  .hero p { font-size: 1rem; }
+/* ── Tablet and up ──────────────────────────────────── */
+@media (min-width: 768px) {
+  .nav-links { display: flex; gap: 2rem; }
+  .hero h1 { font-size: 2.5rem; }
+  .hero p { font-size: 1.2rem; }
 }

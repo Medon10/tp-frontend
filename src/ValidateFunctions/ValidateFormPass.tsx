@@ -1,7 +1,4 @@
-export interface ValidationResult {
-  isValid: boolean;
-  message: string;
-}
+import type { ValidationResult } from '../types';
 
 
 /**

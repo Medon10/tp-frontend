@@ -1,7 +1,4 @@
-export interface ValidationResult {
-  isValid: boolean;
-  message: string;
-}
+import type { ValidationResult } from '../types';
 
 // Expresión regular para validar email (RFC 5322 simplificado)
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;

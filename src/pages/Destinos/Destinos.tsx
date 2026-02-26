@@ -2,14 +2,7 @@ import './Destinos.css';
 import React, { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import { useNavigate } from 'react-router-dom';
-
-interface Destino {
-  id: number;
-  nombre: string;
-  transporte: string[];
-  actividades: string[];
-  imagen: string;
-}
+import type { Destino } from '../../types';
 
 export const Destinos: React.FC = () => {
   const [destinos, setDestinos] = useState<Destino[]>([]);

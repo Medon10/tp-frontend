@@ -5,15 +5,9 @@ import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { validateEmail } from '../../ValidateFunctions/ValidateFormMail';
 import { validatePassword } from '../../ValidateFunctions/ValidateFormPass';
+import type { User } from '../../types';
 
-type UserData = {
-  email: string;
-  password: string;
-  id: number;
-  nombre: string;
-  apellido: string;
-  rol: 'cliente' | 'admin';
-};
+type UserData = User & { password: string };
 
 type ValidationErrors = {
   email?: string;

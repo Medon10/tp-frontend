@@ -6,29 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useFavorites } from '../../context/FavoriteContext';
 import { ReservationModal } from '../../components/layout/ReservationModal';
 import { Notification } from '../../components/layout/Notification';
-
-
-interface Destino {
-  id: number;
-  nombre: string;
-  transporte: string[];
-  actividades: string[];
-  imagen: string;
-}
-
-interface Vuelo {
-  id: number;
-  fechahora_salida: string;
-  fechahora_llegada: string;
-  duracion: number;
-  aerolinea: string;
-  cantidad_asientos: number;
-  capacidad_restante: number;
-  montoVuelo: number;
-  precio_por_persona: number;
-  origen: string;
-  destino: Destino;
-}
+import type { Destino, Vuelo } from '../../types';
 
 export const DetalleDestino: React.FC = () => {
 

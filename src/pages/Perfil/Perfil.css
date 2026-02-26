@@ -517,11 +517,8 @@
   .profile-content-grid {
     gap: 2.5rem;
   }
-}
 
-
-@media (max-width: 768px) {
   .edit-buttons {
-    flex-direction: column;
+    flex-direction: row;
   }
 }

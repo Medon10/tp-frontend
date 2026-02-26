@@ -1,13 +1,6 @@
 import { createContext, useState, useContext, useEffect, type ReactElement } from "react";
 import { api } from "../services/api";
-
-type User = {
-  email: string;
-  id: number;
-  nombre: string;
-  apellido: string;
-  rol: 'cliente' | 'admin';
-};
+import type { User } from "../types";
 
 type AuthContextType = {
   user: User | null;

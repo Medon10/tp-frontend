@@ -4,20 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
-
-interface UserStats {
-  viajesCompletados: number;
-  proximosViajes: number;
-  proximoViaje: {
-    id: number;
-    destino: string;
-    fecha_vuelo: string;
-    precio_total: number;
-  } | null;
-  miembroDesde: string;
-  aniosComoMiembro: string; // en backend es texto legible; hay aniosNumerico opcional
-  aniosNumerico?: number;
-}
+import type { UserStats } from '../../types';
 
 export const Perfil: React.FC = () => {
   const { user, logout, updateUserContext } = useAuth();
