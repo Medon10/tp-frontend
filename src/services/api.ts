@@ -7,6 +7,12 @@ export const api = axios.create({
     withCredentials: true, // enviar/recibir cookies para auth
 })
 
+const PROTECTED_ROUTES = ['/perfil', '/mis-viajes', '/favoritos', '/admin']
+
+const isProtectedPath = (path: string): boolean => {
+  return PROTECTED_ROUTES.some((route) => path === route || path.startsWith(`${route}/`))
+}
+
 // ── Interceptor de respuestas ────────────────────────────────────
 // Centraliza el manejo de errores HTTP comunes para toda la app.
 // Evita duplicar lógica de redirección en cada página/componente.
@@ -26,8 +32,8 @@ api.interceptors.response.use(
       // el AuthContext detectará la pérdida de token al re-montar.
       localStorage.removeItem('auth_token')
       const currentPath = window.location.pathname
-      // Evitar loop infinito si ya estamos en /login
-      if (currentPath !== '/login') {
+      // Solo forzamos login si el usuario está en una ruta privada.
+      if (currentPath !== '/login' && isProtectedPath(currentPath)) {
         window.location.href = '/login'
       }
     }
