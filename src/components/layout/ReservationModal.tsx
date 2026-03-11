@@ -1,5 +1,6 @@
 import './ReservationModal.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import type { Destino } from '../../types';
 
@@ -25,14 +26,43 @@ interface ReservationModalProps {
 export const ReservationModal: React.FC<ReservationModalProps> = ({
   flight,
   isOpen,
-  onClose
+  onClose,
+  onSuccess
 }) => {
   const [cantidadPersonas, setCantidadPersonas] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [paymentStarted, setPaymentStarted] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const reservationIdRef = useRef<number | null>(null);
+  const navigate = useNavigate();
 
   const precioTotal = (flight.precio_por_persona ?? 0) * cantidadPersonas;
+
+  // Limpiar polling al desmontar o cerrar
+  useEffect(() => {
+    return () => {
+      if (pollingRef.current) clearInterval(pollingRef.current);
+    };
+  }, []);
+
+  const startPolling = (resId: number) => {
+    reservationIdRef.current = resId;
+    // Consultar cada 5 segundos si el pago fue aprobado
+    pollingRef.current = setInterval(async () => {
+      try {
+        const resp = await api.get(`/payments/check-status/${resId}`);
+        const estado = resp.data?.data?.estado;
+        if (estado === 'confirmado' || estado === 'completado') {
+          if (pollingRef.current) clearInterval(pollingRef.current);
+          setPaymentConfirmed(true);
+        }
+      } catch {
+        // Silencioso — seguimos intentando
+      }
+    }, 5000);
+  };
 
   const handleReservar = async () => {
     setError('');
@@ -63,6 +93,7 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
       // 3. Abrir checkout en nueva pestaña y mostrar feedback
       window.open(initPoint, '_blank');
       setPaymentStarted(true);
+      startPolling(reservationId);
     } catch (error: any) {
       setError(
         error?.response?.data?.detail ||
@@ -85,27 +116,51 @@ export const ReservationModal: React.FC<ReservationModalProps> = ({
             <i className="fas fa-times"></i>
           </button>
 
-          <div className="modal-header">
-            <i className="fas fa-external-link-alt modal-icon" style={{ color: 'var(--primary, #3a86ff)' }}></i>
-            <h2>Completá el pago</h2>
-          </div>
-
-          <div className="modal-body" style={{ textAlign: 'center' }}>
-            <p style={{ fontSize: '1.05rem', color: '#666', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-              Se abrió <strong>Mercado Pago</strong> en una nueva pestaña.
-              Completá el pago allí y luego volvé a esta página.
-            </p>
-            <p style={{ fontSize: '0.9rem', color: '#999' }}>
-              Podés ver el estado de tu reserva en <strong>"Mis Viajes"</strong>.
-            </p>
-          </div>
-
-          <div className="modal-footer">
-            <button className="btn" onClick={onClose}>
-              <i className="fas fa-check"></i>
-              Entendido
-            </button>
-          </div>
+          {paymentConfirmed ? (
+            <>
+              <div className="modal-header">
+                <i className="fas fa-check-circle modal-icon" style={{ color: '#00c853' }}></i>
+                <h2>¡Pago confirmado!</h2>
+              </div>
+              <div className="modal-body" style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: '1.05rem', color: '#666', lineHeight: 1.6, marginBottom: '1.5rem' }}>
+                  Tu reserva fue confirmada exitosamente. Podés ver los detalles en <strong>"Mis Viajes"</strong>.
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn btn-outline" onClick={() => { onSuccess(); onClose(); }}>
+                  Cerrar
+                </button>
+                <button className="btn" onClick={() => navigate('/mis-viajes')}>
+                  <i className="fas fa-suitcase"></i>
+                  Ir a Mis Viajes
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="modal-header">
+                <i className="fas fa-external-link-alt modal-icon" style={{ color: 'var(--primary, #3a86ff)' }}></i>
+                <h2>Completá el pago</h2>
+              </div>
+              <div className="modal-body" style={{ textAlign: 'center' }}>
+                <p style={{ fontSize: '1.05rem', color: '#666', lineHeight: 1.6, marginBottom: '1rem' }}>
+                  Se abrió <strong>Mercado Pago</strong> en una nueva pestaña.
+                  Completá el pago allí.
+                </p>
+                <p style={{ fontSize: '0.9rem', color: '#999', marginBottom: '1rem' }}>
+                  <i className="fas fa-spinner fa-spin" style={{ marginRight: '0.5rem' }}></i>
+                  Esperando confirmación del pago...
+                </p>
+              </div>
+              <div className="modal-footer">
+                <button className="btn" onClick={onClose}>
+                  <i className="fas fa-check"></i>
+                  Entendido
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </div>
     );
