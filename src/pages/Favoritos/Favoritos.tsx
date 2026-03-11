@@ -182,7 +182,7 @@ export const Favoritos: React.FC = () => {
                   <div className="favorito-footer">
                     <div className="precio">
                       <span className="precio-label">Desde</span>
-                      <span className="precio-valor">${vuelo.precio_por_persona.toLocaleString('es-AR')}</span>
+                      <span className="precio-valor">${(vuelo.precio_por_persona ?? 0).toLocaleString('es-AR')}</span>
                       <span className="precio-moneda">USD/persona</span>
                     </div>
                     <div className="footer-actions">
