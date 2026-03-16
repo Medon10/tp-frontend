@@ -298,7 +298,7 @@ export const Login: React.FC = () => {
         </section>
 
         <section className="auth-redirect">
-          <p>¿No tienes cuenta? <a href="./register" className="link-primary">Regístrate aquí</a></p>
+          <p>¿No tienes cuenta? <a href="/register" className="link-primary">Regístrate aquí</a></p>
         </section>
 
         <section className="features">
