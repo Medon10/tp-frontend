@@ -126,7 +126,7 @@ export const Login: React.FC = () => {
 
       if (response.status === 200 && response.data.user) {
         const userData = response.data.user!;
-        // Guardar token bearer como fallback si la cookie es bloqueada
+        // Guardar token bearer para autenticación en requests protegidos
         if (response.data.token) {
           try {
             localStorage.setItem('auth_token', response.data.token);

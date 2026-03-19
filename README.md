@@ -62,7 +62,7 @@ src/
 ## Funcionalidades
 
 - **Búsqueda inteligente** de vuelos por presupuesto, personas y origen
-- **Autenticación** con JWT (cookie httpOnly + Bearer token)
+- **Autenticación** con JWT (Bearer token en LocalStorage)
 - **Dos niveles de acceso:** usuario y administrador
 - **Rutas protegidas** con guards (`ProtectedRoute`, `AdminRoute`)
 - **Favoritos** con estado global vía Context API

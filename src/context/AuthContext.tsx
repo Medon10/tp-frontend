@@ -36,17 +36,11 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
     } catch {}
   };
 
-  const logout = async () => {
-    try {
-      // Llamar al backend para limpiar la cookie
-  await api.post('/users/logout', {});
-    } catch (error) {
-      console.error('Error en logout:', error);
-    } finally {
-      setUser(null);
-      setToken(null);
-      localStorage.removeItem('auth_token');
-    }
+  const logout = () => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('auth_token');
+    delete api.defaults.headers.common['Authorization'];
   };
 
 const checkAuth = async () => {
@@ -58,11 +52,6 @@ const checkAuth = async () => {
     
     if (response.status === 200 && response.data?.data) {
       setUser(response.data.data);
-    } else {
-      // Si falla la cookie pero tenemos token almacenado, intentar obtener perfil usando bearer
-      if (!response.data?.data && !user && token) {
-        // Perfil ya intentado, nada más
-      }
     }
   } catch (error: any) {
     // Silenciar error 401 (no autenticado es normal)
