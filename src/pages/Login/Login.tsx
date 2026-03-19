@@ -7,8 +7,6 @@ import { validateEmail } from '../../ValidateFunctions/ValidateFormMail';
 import { validatePassword } from '../../ValidateFunctions/ValidateFormPass';
 import type { User } from '../../types';
 
-type UserData = User & { password: string };
-
 type ValidationErrors = {
   email?: string;
   password?: string;
@@ -92,17 +90,9 @@ export const Login: React.FC = () => {
     setIsLoading(true);
     setErrors({});
 
-
-    // Debug - ver qué se está enviando
-  console.log('Enviando a:', `/users/login`);
-    console.log('Datos a enviar:', {
-      email: formData.email,
-      password: formData.password
-    });
-
     try {
       interface LoginResponse {
-        user?: UserData;
+        user?: User;
         message?: string;
         token?: string;
       }
@@ -122,8 +112,6 @@ export const Login: React.FC = () => {
         }
       );
 
-      console.log('Respuesta del servidor:', response.data);
-
       if (response.status === 200 && response.data.user) {
         const userData = response.data.user!;
         // Guardar token bearer para autenticación en requests protegidos
@@ -133,22 +121,15 @@ export const Login: React.FC = () => {
           } catch {}
         }
         login(userData);
-        console.log('Login exitoso:', userData);
       }
     } catch (error: any) {
-      console.error('Error completo:', error);
-      console.error('Error response:', error.response);
-      console.error('Error request:', error.request);
-      console.error('Error message:', error.message);
+      console.error('Error en login:', error);
       
       if (error.code === 'ECONNABORTED') {
         setErrors({ general: 'La conexión tardó demasiado. Intenta de nuevo.' });
       } else if (error.response) {
         const status = error.response.status;
         const serverMessage = error.response.data?.message;
-        
-        console.log('Status de error:', status);
-        console.log('Mensaje del servidor:', serverMessage);
         
         switch (status) {
           case 400:
@@ -171,9 +152,6 @@ export const Login: React.FC = () => {
         }
 
       } else if (error.request) {
-        console.log('No hay respuesta del servidor');
-        console.log('Request config:', error.config);
-
         // Mensaje único cuando no hay respuesta del servidor o conexión
         setErrors({
           general: 'Sin conexión al servidor. Verifica la conexión a internet y al servidor.'
