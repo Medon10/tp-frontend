@@ -85,6 +85,7 @@ export const FlightForm: React.FC<FlightFormProps> = ({ vueloAEditar, onFormSubm
       montoVuelo: Number(formData.montoVuelo),
       cantidad_asientos: Number(formData.cantidad_asientos),
       duracion: Number(formData.duracion),
+      capacidad_restante: Number(formData.cantidad_asientos),
     };
 
     try {
