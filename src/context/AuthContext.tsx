@@ -27,20 +27,12 @@ export const AuthProvider = ({ children }: { children: ReactElement }) => {
 
   const login = (userData: User) => {
     setUser(userData);
-    try {
-      const saved = localStorage.getItem('auth_token');
-      if (saved) {
-        setToken(saved);
-        api.defaults.headers.common['Authorization'] = `Bearer ${saved}`;
-      }
-    } catch {}
-  };
+};
 
   const logout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('auth_token');
-    delete api.defaults.headers.common['Authorization'];
   };
 
 const checkAuth = async () => {
@@ -49,17 +41,10 @@ const checkAuth = async () => {
     const response = await api.get<{ data: User }>('/users/profile/me', { 
       timeout: 5000
     });
-    
-    if (response.status === 200 && response.data?.data) {
+    if (response.data?.data) {
       setUser(response.data.data);
     }
-  } catch (error: any) {
-    // Silenciar error 401 (no autenticado es normal)
-    if (error.response?.status === 401) {
-      console.log('Usuario no autenticado (normal)');
-    } else {
-      console.error('Error verificando autenticación:', error);
-    }
+  } catch {
     setUser(null);
   } finally {
     setLoading(false);
@@ -73,12 +58,7 @@ const updateUserContext = (updatedUser: User) => {
   // Verificar autenticación al cargar
   useEffect(() => {
     checkAuth();
-    // Al montar, si hay token, configurar header Authorization
-    if (token) {
-      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-    } else {
-      delete api.defaults.headers.common['Authorization'];
-    }
+    // ya no setea ni borra header aca, centralizado en api.ts
   }, []);
 
   const value: AuthContextType = {

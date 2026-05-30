@@ -13,6 +13,16 @@ const isProtectedPath = (path: string): boolean => {
   return PROTECTED_ROUTES.some((route) => path === route || path.startsWith(`${route}/`))
 }
 
+// ── Interceptor de requests ──────────────────────────────────────
+// Lee el token del localStorage antes de cada petición
+api.interceptors.request.use((config) => {
+    const token = localStorage.getItem('auth_token')
+    if (token) {
+      config.headers['Authorization'] = `Bearer ${token}`
+    }
+    return config
+  })
+
 // ── Interceptor de respuestas ────────────────────────────────────
 // Centraliza el manejo de errores HTTP comunes para toda la app.
 // Evita duplicar lógica de redirección en cada página/componente.
