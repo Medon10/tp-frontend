@@ -1,16 +1,13 @@
 import './Login.css';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { api } from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { validateEmail } from '../../ValidateFunctions/ValidateFormMail';
 import { validatePassword } from '../../ValidateFunctions/ValidateFormPass';
-import type { User } from '../../types';
 
 type ValidationErrors = {
   email?: string;
   password?: string;
-  general?: string;
 };
 
 export const Login: React.FC = () => {
@@ -19,11 +16,10 @@ export const Login: React.FC = () => {
     password: ''
   });
 
-  const [isLoading, setIsLoading] = useState(false);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [showPassword, setShowPassword] = useState(false);
 
-  const { login, isAuthenticated, loading } = useAuth();
+  const { login, isAuthenticated, loading, loginLoading, loginError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -54,10 +50,6 @@ export const Login: React.FC = () => {
       setErrors(newErrors);
     }
 
-    // Limpiar error general
-    if (errors.general) {
-      setErrors(prev => ({ ...prev, general: undefined }));
-    }
   };
 
   const validateForm = (): boolean => {
@@ -87,81 +79,8 @@ export const Login: React.FC = () => {
       return;
     }
 
-    setIsLoading(true);
     setErrors({});
-
-    try {
-      interface LoginResponse {
-        user?: User;
-        message?: string;
-        token?: string;
-      }
-
-      const response = await api.post<LoginResponse>(
-        `/users/login`,
-        {
-          email: formData.email,
-          password: formData.password
-        },
-        {
-          timeout: 5000,
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },  
-        }
-      );
-
-      if (response.status === 200 && response.data.user) {
-        const userData = response.data.user!;
-        // Guardar token bearer para autenticación en requests protegidos
-        if (response.data.token) {
-          try {
-            localStorage.setItem('auth_token', response.data.token);
-          } catch {}
-        }
-        login(userData);
-      }
-    } catch (error: any) {
-      console.error('Error en login:', error);
-      
-      if (error.code === 'ECONNABORTED') {
-        setErrors({ general: 'La conexión tardó demasiado. Intenta de nuevo.' });
-      } else if (error.response) {
-        const status = error.response.status;
-        const serverMessage = error.response.data?.message;
-        
-        switch (status) {
-          case 400:
-            setErrors({ general: serverMessage || 'Datos de entrada inválidos.' });
-            break;
-          case 401:
-            setErrors({ general: 'Email o contraseña incorrectos.' });
-            break;
-          case 404:
-            setErrors({ general: 'Usuario no encontrado.' });
-            break;
-          case 429:
-            setErrors({ general: 'Demasiados intentos. Intenta más tarde.' });
-            break;
-          case 500:
-            setErrors({ general: 'Error del servidor. Intenta más tarde.' });
-            break;
-          default:
-            setErrors({ general: serverMessage || 'Error de autenticación.' });
-        }
-
-      } else if (error.request) {
-        // Mensaje único cuando no hay respuesta del servidor o conexión
-        setErrors({
-          general: 'Sin conexión al servidor. Verifica la conexión a internet y al servidor.'
-        });
-      } else {
-        setErrors({ general: 'Error inesperado. Intenta de nuevo.' });
-      }
-    } finally {
-      setIsLoading(false);
-    }
+    await login(formData.email, formData.password);
   };
 
   const togglePasswordVisibility = () => {
@@ -193,10 +112,10 @@ export const Login: React.FC = () => {
 
         <section className="budget-form">
           <form onSubmit={handleSubmit}>
-            {errors.general && (
+            {loginError && (
               <div className="error-message">
                 <i className="fas fa-exclamation-triangle"></i>
-                {errors.general}
+                {loginError}
               </div>
             )}
             
@@ -217,7 +136,7 @@ export const Login: React.FC = () => {
                 placeholder="tu@email.com"
                 value={formData.email}
                 onChange={handleInputChange}
-                disabled={isLoading}
+                disabled={loginLoading}
                 className={errors.email ? 'error' : ''}
                 maxLength={255}
                 autoComplete="email"
@@ -242,7 +161,7 @@ export const Login: React.FC = () => {
                   placeholder="Tu contraseña"
                   value={formData.password}
                   onChange={handleInputChange}
-                  disabled={isLoading}
+                  disabled={loginLoading}
                   className={errors.password ? 'error' : ''}
                   autoComplete="current-password"
                 />
@@ -250,7 +169,7 @@ export const Login: React.FC = () => {
                   type="button"
                   className="toggle-password"
                   onClick={togglePasswordVisibility}
-                  disabled={isLoading}
+                  disabled={loginLoading}
                   aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                 >
                   <i className={`fas fa-eye${showPassword ? '' : '-slash'}`}></i>
@@ -260,10 +179,10 @@ export const Login: React.FC = () => {
             
             <button 
               type="submit" 
-              className={`btn btn-full ${isLoading ? 'btn-loading' : ''}`}
-              disabled={isLoading}
+              className={`btn btn-full ${loginLoading ? 'btn-loading' : ''}`}
+              disabled={loginLoading}
             >
-              {isLoading ? (
+              {loginLoading ? (
                 <>
                   <i className="fas fa-spinner fa-spin"></i>
                   Iniciando sesión...
